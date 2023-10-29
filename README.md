@@ -20,7 +20,7 @@ equipment/vehicles necessary to respond to the case.
     - Finish PDF (Maz, William)
 - Dec 1: Complete group peer evaluation Milestone 6 individually (Bryan, Maz, William)
 - Dec 3: Meet up to practice demo contents (Bryan, Maz, William), hand in any other deliverables
-- Dec 4-7: Complete Milestone 5 demo (Bryan, Maz, William)
+- Dec 4-7: Complete Milestone 5 demo (Bryan, Maziyar, William)
 
 ## Challenges
 - Communication on tasks
