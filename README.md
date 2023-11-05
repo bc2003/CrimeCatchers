@@ -32,3 +32,8 @@ equipment/vehicles necessary to respond to the case.
 - Finding the proper resources to accomplish the tasks (e.g. tutorials)
   - Ask TA if stuck on finding resources ASAP
 
+## Attribution
+The starter code for this project is from the CPSC 304 course-provided resources
+for a NodeJS/JavaScript tech stack.
+See [here](https://www.students.cs.ubc.ca/~cs-304/resources/javascript-oracle-resources/node-setup.html).
+
