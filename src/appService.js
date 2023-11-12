@@ -110,11 +110,31 @@ async function countDemotable() {
     });
 }
 
+/**
+ * Creates an incident with the following info
+ * @param {Object} incidentInfo              Some incident info
+ * @param {string} incidentInfo.email        Email of the reporting person
+ * @param {string} incidentInfo.description  Description of the incident
+ * @param {Date}   incidentInfo.date         Date of incident
+ * 
+ * @returns {number} Generated incident ID
+ * @throws An exception if updating the database fails
+ */
+async function createIncident(incidentInfo) {
+    return await withOracleDB(async (connection) => {
+        let query = "";
+        const result = await connection.execute(query);
+        // TODO
+        return result;
+    });
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
     initiateDemotable, 
     insertDemotable, 
     updateNameDemotable, 
-    countDemotable
+    countDemotable,
+    createIncident
 };
