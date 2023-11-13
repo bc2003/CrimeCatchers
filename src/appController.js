@@ -146,8 +146,12 @@ router.get("/civilian/reporter", async (req, res) => {
  *
  * Successful response will have status 200
  */
-router.put("civilian/reporter", async (req, res) => {
+router.put("/civilian/reporter", async (req, res) => {
     // TODO
+    console.log(req.body.email);
+    res.status(500).json({
+        body: `not implemented, email was ${req.body.email}`
+    });
 });
 
 /**
@@ -162,7 +166,7 @@ router.put("civilian/reporter", async (req, res) => {
  * Successful response will be status 200
  */
 router.put("/civilian/incident-update", async (req, res) => {
-    if (!req.body.incidentID || !req.body.date || !req.body.newDescription, !req.body.status) {
+    if (!req.body.incidentID || !req.body.date || !req.body.newDescription || !req.body.status) {
         req.status(500).json({
             body: "Missing parameters"
         });
@@ -178,6 +182,7 @@ router.put("/civilian/incident-update", async (req, res) => {
  * Expected request:
  * {
  *     name: string,
+ *     location: string, (optional if updating)
  *     // ONE OF THE FOLLOWING:
  *     physicalBuild: string, numPriorOffenses: number
  *     OR
@@ -247,5 +252,37 @@ router.get("/municipal/incidents", async (req, res) => {
 router.get("/municipal/equipment", async (req, res) => {
    // TODO
 });
+
+/**
+ * Expected request:
+ * {
+ *     professionalID: number
+ * }
+ *
+ * Successful response will have status code 200
+ */
+router.delete("/municipal/responder", async (req, res) => {
+   // TODO
+});
+
+/**
+ * Expected request:
+ * {
+ *     professionalID: number,
+ *     dept: number (the branch ID of the department this responder works at) (optional if updating)
+ *     THE FOLLOWING ARE OPTIONAL BUT AT LEAST ONE SHOULD BE SELECTED
+ *     name: string,
+ *     occupation: string
+ * }
+ *
+ * Successful response will have status code 200
+ */
+router.put("/municipal/responder", async (req, res) => {
+   // TODO
+});
+
+/**
+ *
+ */
 
 module.exports = router;
