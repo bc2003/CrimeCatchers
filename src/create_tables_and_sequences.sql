@@ -1,1 +1,1 @@
-../create_tables.sql
+../create_tables_and_sequences.sql
