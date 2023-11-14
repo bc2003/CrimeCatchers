@@ -1,6 +1,5 @@
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
-const fetch = require('node-fetch');
 const envVariables = loadEnvFile('./.env');
 
 // Database configuration setup. Ensure your .env file has the required database credentials.
@@ -9,6 +8,9 @@ const dbConfig = {
     password: envVariables.ORACLE_PASS,
     connectString: `${envVariables.ORACLE_HOST}:${envVariables.ORACLE_PORT}/${envVariables.ORACLE_DBNAME}`
 };
+
+// See https://stackoverflow.com/a/1373724
+const EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
 
 
 // ----------------------------------------------------------
@@ -115,13 +117,6 @@ const incidentData = {
     }
 }
   
-  // Call the function with the incident data
-  reportIncident(incidentData).then(responseData => {
-    if (responseData) {
-      // Do something with the responseData.incidentID
-    }
-  });
-
 
   async function updateIncident(incidentID, newDescription, date) {
     const updateData = {
@@ -312,17 +307,36 @@ async function countDemotable() {
  * @param {Object} incidentInfo              Some incident info
  * @param {string} incidentInfo.email        Email of the reporting person
  * @param {string} incidentInfo.description  Description of the incident
- * @param {Date}   incidentInfo.date         Date of incident
+ * @param {string} incidentInfo.date         Date of incident (in ISO format)
+ * @param {Object[]} incidentInfo.involved   Involved people
+ * @param {string} incidentInfo.name
  * 
- * @returns {number} Generated incident ID
- * @throws An exception if updating the database fails
+ * @returns {Object} generated - Generated ids
+ * @returns {number} generated.incidentID - incident ID
+ * @returns {number[]} generated.involvedIDs - IDs for all involved people
+ *
+ * @throws {Error} if updating the database fails
  */
 async function createIncident(incidentInfo) {
     return await withOracleDB(async (connection) => {
-        let query = "";
-        const result = await connection.execute(query);
+        // validate email and date in expected formats
+
+        // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
+        // for the regex
+        if (!incidentInfo.email.match(EMAIL_REGEX)) {
+            throw new Error("Invalid email");
+        }
+
+        const dateNum = Date.parse(incidentInfo.date);
+        if (isNaN(dateNum)) {
+            throw new Error("Invalid date");
+        }
+
+        const dateIncident = new Date(dateNum);
+        let queryInfo = "INSERT INTO incidentInfo"
+        // const result = await connection.execute(query);
         // TODO
-        return result;
+        throw new Error("not implemented");
     });
 }
 

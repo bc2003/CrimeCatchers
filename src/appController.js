@@ -29,15 +29,6 @@ router.post("/initiate-demotable", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
-router.post('/civilian/incident', async (req, res) => {
-    try {
-        // Your logic to handle the request...
-    } catch (error) {
-        console.error('Error processing request:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
 
 router.post("/insert-demotable", async (req, res) => {
     const { id, name } = req.body;
@@ -49,105 +40,6 @@ router.post("/insert-demotable", async (req, res) => {
     }
 });
 
-router.post('/civilian/incident', async (req, res) => {
-    // Extract relevant data from request body
-    const { Email, Description, Date, Status, Involved } = req.body;
-    // Construct incident data based on the request
-    const incidentData = {
-        Email,
-        Description,
-        Date: Date || new Date().toISOString(),
-        Status: Status || 'created',
-        Involved
-    };
-
-    try {
-        const responseData = await reportIncident(incidentData);
-        if (responseData) {
-            res.status(200).json(responseData);
-        } else {
-            res.status(500).json({ message: 'Failed to report the incident' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error reporting the incident', error: error.message });
-    }
-});
-
-router.post('/incident-update', async (req, res) => {
-    const { incidentID, newDescription, date } = req.body;
-    try {
-        const updateResult = await appService.updateIncident(incidentID, newDescription, date);
-        if (updateResult) {
-            res.json({ success: true });
-        } else {
-            res.status(500).json({ success: false });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating the incident', error: error.message });
-    }
-});
-
-router.delete('/incident', async (req, res) => {
-    const { incidentID } = req.query;
-    try {
-        const deleteResult = await appService.deleteIncident(incidentID);
-        if (deleteResult) {
-            res.json({ success: true });
-        } else {
-            res.status(500).json({ success: false });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error deleting the incident', error: error.message });
-    }
-});
-
-router.get('/reporter', async (req, res) => {
-    const { email } = req.query;
-    try {
-        const reporterDetails = await appService.getReporterDetails(email);
-        if (reporterDetails) {
-            res.json(reporterDetails);
-        } else {
-            res.status(404).json({ message: 'Reporter not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error retrieving reporter details', error: error.message });
-    }
-});
-
-router.put('/reporter', async (req, res) => {
-    const { name, address, phoneNumber, email } = req.body;
-    try {
-        const updateResult = await appService.updateReporterDetails(name, address, phoneNumber, email);
-        if (updateResult) {
-            res.json({ success: true });
-        } else {
-            res.status(500).json({ success: false });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Error updating reporter details', error: error.message });
-    }
-});
-
-router.get('/municipal/incident', async (req, res) => {
-    const { sort_by, status, display } = req.query;
-    try {
-        const incidents = await appService.getIncidents(sort_by, status, display ? display.split(',') : []);
-        res.json(incidents);
-    } catch (error) {
-        res.status(500).json({ message: 'Error retrieving incidents', error: error.message });
-    }
-});
-
-router.get('/municipal/equipment', async (req, res) => {
-    const { incidentID, sort_by, display } = req.query;
-    try {
-        const equipmentDetails = await appService.getEquipmentDetails(incidentID, sort_by, display ? display.split(',') : []);
-        res.json(equipmentDetails);
-    } catch (error) {
-        res.status(500).json({ message: 'Error retrieving equipment details', error: error.message });
-    }
-});
 
 router.post("/update-name-demotable", async (req, res) => {
     const { oldName, newName } = req.body;
@@ -184,17 +76,29 @@ router.get('/count-demotable', async (req, res) => {
  * {
  *      email: string, (this should be the email of the Reporter)
  *      description: string,
- *      date: string, (in the form of YYYY-MM-DD)
- *      involved: number[], personIDs of involved persons (you might need to make them first)
+ *      date: string, (in ISO format)
+ *      involved: Object[] of the following:
+ *      {
+ *          name: string,
+ *          specialAttributes: {
+ *              physicalBuild: string
+ *              numPriorOffenses: number
+ *              // OR
+ *              injuries: string
+ *              // OR
+ *              phoneNumber: string
+ *          }
+ *      }
  * }
  * 
  * Successful response:
  * {
  *      incidentID: number (the generated incident ID)
+ *      involvedIDs: number[] (generated IDs for each involved person)
  * }
  */
 router.post("/civilian/incident", async (req, res) => {
-    if (!req.body.email || !req.body.description || !req.body.date) {
+    if (!req.body.email || !req.body.description || !req.body.date || !req.body.involved) {
         res.status(400).json({
             body: "Missing parameters"
         });
@@ -205,9 +109,8 @@ router.post("/civilian/incident", async (req, res) => {
             incidentID: result
         });
     } catch (err) {
-        res.status(400).json({
-            body: "Could not complete query due to server error"
-        });
+        let errmsg = `Could hot complete request due to: ${err.message}`;
+        res.status(400).send(errmsg);
     }
 });
 
@@ -391,8 +294,24 @@ router.put("/municipal/responder", async (req, res) => {
    // TODO
 });
 
-/**
- *
- */
+router.get('/municipal/incident', async (req, res) => {
+    const { sort_by, status, display } = req.query;
+    try {
+        const incidents = await appService.getIncidents(sort_by, status, display ? display.split(',') : []);
+        res.json(incidents);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving incidents', error: error.message });
+    }
+});
+
+router.get('/municipal/equipment', async (req, res) => {
+    const { incidentID, sort_by, display } = req.query;
+    try {
+        const equipmentDetails = await appService.getEquipmentDetails(incidentID, sort_by, display ? display.split(',') : []);
+        res.json(equipmentDetails);
+    } catch (error) {
+        res.status(500).json({ message: 'Error retrieving equipment details', error: error.message });
+    }
+});
 
 module.exports = router;

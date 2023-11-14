@@ -42,10 +42,37 @@ describe("CivilianRequests", function() {
              address: "2366 Main Mall",
              phoneNumber: "6048222873"
           }).then((res) => {
-             console.log(res.body);
              chai.expect(res.status).to.equal(200);
       });
    });
+
+    it("should handle basic input errors for incident with an error code", async () => {
+        await chai.request(SERVER)
+            .post("/civilian/incident")
+            .send({
+                email: "munce",
+                description: "Bike theft",
+                date: new Date("10 October 2023").toISOString(),
+                involved: []
+            }).then((res) => {
+                chai.expect(res.status).to.equal(400);
+                console.log(res.text);
+                chai.expect(res.text).to.contain("email");
+            });
+
+        await chai.request(SERVER)
+            .post("/civilian/incident")
+            .send({
+                email: "munce@student.ubc.ca",
+                description: "Bike theft",
+                date: "fadjkslfjas",
+                involved: []
+            }).then((res) => {
+                chai.expect(res.status).to.equal(400);
+                console.log(res.text);
+                chai.expect(res.text).to.contain("date");
+            });
+    });
 
    it("should be able to send a basic request for making an incident", function() {
       return chai.request(SERVER)
@@ -53,7 +80,7 @@ describe("CivilianRequests", function() {
           .send({
               email: "munce@student.ubc.ca",
               description: "Bike theft",
-              date: "2023-10-11",
+              date: new Date("10 October 2023").toISOString(),
               involved: []
           }).then((res) => {
               chai.expect(res.status).to.equal(200);
