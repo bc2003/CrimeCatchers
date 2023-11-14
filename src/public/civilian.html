@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Input Form</title>
+</head>
+<body>
+
+<h2>Submit Your Report</h2>
+
+<form action="/submit-your-data-url" method="post">
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br>
+
+    <label for="description">Description:</label><br>
+    <textarea id="description" name="description" required></textarea><br>
+
+    <label for="date">Date:</label><br>
+    <input type="date" id="date" name="date" required><br>
+
+    <label for="status">Status:</label><br>
+    <input type="text" id="status" name="status" value="created" readonly><br>
+
+    <input type="submit" value="Submit">
+</form>
+
+    <h1>Update your report</h1>
+    <form id="updateIncidentForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required> <br><br>
+        
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" required></textarea> <br><br>
+        
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" required> <br><br>
+        
+        <label for="incidentID">Incident ID:</label>
+        <input type="text" id="incidentID" name="incidentID" required> <br><br>
+        
+        <label for="newDescription">New Description:</label>
+        <textarea id="newDescription" name="newDescription" required></textarea> <br><br>
+        
+        <label for="status">Status:</label>
+        <input type="text" id="status" name="status" value="Cancelled" readonly> <br><br>
+        
+        <input type="submit" value="Update Incident" onclick="updateStatus()">
+    </form>
+
+
+    <h2>Delete Incident</h2>
+    <form id="deleteIncidentForm" onsubmit="return deleteIncident()">
+        <label for="deleteIncidentID">Incident ID:</label>
+        <input type="text" id="deleteIncidentID" name="incidentID" required> <br><br>
+        <input type="submit" value="Delete Incident">
+    </form>
+
+    <script>
+        function updateIncident() {
+            return false;
+        }
+
+        function deleteIncident() {
+            var incidentID = document.getElementById('deleteIncidentID').value;
+            
+            if(incidentID) {
+                console.log('Deleting incident with ID:', incidentID);
+            } else {
+                alert('Please enter an Incident ID to delete.');
+            }
+            return false;
+        }
+    </script>
+
+
+<h2>Get Reporter Details</h2>
+<form id="getReporterDetailsForm" onsubmit="return getReporterDetails()">
+    <label for="getEmail">Email:</label>
+    <input type="email" id="getEmail" name="email" required> <br><br>
+    
+    <input type="submit" value="Get Details">
+</form>
+
+<!-- Report Deails-->
+<div id="reporterDetailsResult">
+    <p>Name: <span id="reporterName"></span></p>
+    <p>Address: <span id="reporterAddress"></span></p>
+    <p>Phone: <span id="reporterPhone"></span></p>
+</div>
+
+<script>
+    function getReporterDetails() {
+        var email = document.getElementById('getEmail').value;
+
+        fetch('your-endpoint?email=' + encodeURIComponent(email))
+            .then(response => {
+                if(response.status === 404) {
+                    throw new Error('Not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById('reporterName').textContent = data.name;
+                document.getElementById('reporterAddress').textContent = data.address;
+                document.getElementById('reporterPhone').textContent = data.phone;
+            })
+            .catch(error => {
+                document.getElementById('reporterDetailsResult').innerHTML = 'Reporter not found (404)';
+                console.error('Error:', error);
+            });
+        return false;
+    }
+</script>
+
+<!-- Update Reporter Deails-->
+<h2>Update Reporter Details</h2>
+<form id="updateReporterForm" onsubmit="return updateReporterDetails()">
+    <label for="updateName">Name:</label>
+    <input type="text" id="updateName" name="name" required> <br><br>
+    
+    <label for="updateAddress">Address:</label>
+    <input type="text" id="updateAddress" name="address" required> <br><br>
+    
+    <label for="updatePhoneNumber">Phone Number:</label>
+    <input type="tel" id="updatePhoneNumber" name="phoneNumber" required> <br><br>
+    
+    <label for="updateEmail">Email:</label>
+    <input type="email" id="updateEmail" name="email" required> <br><br>
+    
+    <input type="submit" value="Update Reporter">
+</form>
+
+<div id="updateResultMsg"></div>
+
+<script>
+    function updateReporterDetails() {
+        var name = document.getElementById('updateName').value;
+        var address = document.getElementById('updateAddress').value;
+        var phoneNumber = document.getElementById('updatePhoneNumber').value;
+        var email = document.getElementById('updateEmail').value;
+
+        var reporterData = {
+            name: name,
+            address: address,
+            phoneNumber: phoneNumber,
+            email: email
+        };
+
+        fetch('/civilian/reporter', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reporterData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('updateResultMsg').textContent = 'Reporter updated successfully.';
+        })
+        .catch(error => {
+            document.getElementById('updateResultMsg').textContent = 'Error updating reporter: ' + error.message;
+            console.error('Error:', error);
+        });
+
+        return false;
+    }
+</script>
+
+
+<!-- Update Involved Person Deails-->
+<h2>Update Involved Person Details</h2>
+    <form id="updateInvolvedPersonForm" onsubmit="return updateInvolvedPersonDetails()">
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required> <br><br>
+        
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required> <br><br>
+        
+        <label for="physicalBuild">Physical Build:</label>
+        <input type="text" id="physicalBuild" name="physicalBuild" required> <br><br>
+        
+        <label for="priorOffences">Number of Prior Offences:</label>
+        <input type="number" id="priorOffences" name="priorOffences" required> <br><br>
+        
+        <label for="injuries">Injuries:</label>
+        <input type="text" id="injuries" name="injuries" required> <br><br>
+        
+        <label for="phoneNumber">Phone Number:</label>
+        <input type="tel" id="phoneNumber" name="phoneNumber" required> <br><br>
+        
+        <input type="submit" value="Update Involved Person">
+    </form>
+
+    <div id="updateInvolvedPersonResultMsg">Person ID: <span id="personID"></span></div>
+
+    <script>
+        function updateInvolvedPersonDetails() {
+            var location = document.getElementById('location').value;
+            var name = document.getElementById('name').value;
+            var physicalBuild = document.getElementById('physicalBuild').value;
+            var priorOffences = document.getElementById('priorOffences').value;
+            var injuries = document.getElementById('injuries').value;
+            var phoneNumber = document.getElementById('phoneNumber').value;
+
+            var involvedPersonData = {
+                location: location,
+                name: name,
+                physicalBuild: physicalBuild,
+                priorOffences: parseInt(priorOffences, 10),
+                injuries: injuries,
+                phoneNumber: phoneNumber
+            };
+
+            fetch('/civilian/involvedperson', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(involvedPersonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.personID) {
+                    document.getElementById('personID').textContent = data.personID;
+                    document.getElementById('updateInvolvedPersonResultMsg').textContent = `Update successful. Person ID: ${data.personID}`;
+                } else {
+                    document.getElementById('updateInvolvedPersonResultMsg').textContent = 'Update failed. No Person ID returned.';
+                }
+            })
+            .catch(error => {
+                document.getElementById('updateInvolvedPersonResultMsg').textContent = 'Error: ' + error.message;
+                console.error('Error:', error);
+            });
+
+            return false;
+        }
+    </script>
+
+</html>
+
+
+</body>
+</html>
