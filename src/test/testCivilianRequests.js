@@ -47,7 +47,8 @@ describe("CivilianRequests", function() {
              address: "2366 Main Mall",
              phoneNumber: "6048222873"
           }).then((res) => {
-             chai.expect(res.status).to.equal(200);
+              console.log(res.text);
+              chai.expect(res.status).to.equal(200);
       });
    });
 
@@ -61,7 +62,6 @@ describe("CivilianRequests", function() {
                 involved: []
             }).then((res) => {
                 chai.expect(res.status).to.equal(400);
-                console.log(res.text);
                 chai.expect(res.text).to.contain("email");
             });
 
@@ -74,7 +74,6 @@ describe("CivilianRequests", function() {
                 involved: []
             }).then((res) => {
                 chai.expect(res.status).to.equal(400);
-                console.log(res.text);
                 chai.expect(res.text).to.contain("date");
             });
     });

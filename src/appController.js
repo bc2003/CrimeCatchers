@@ -99,17 +99,16 @@ router.get('/count-demotable', async (req, res) => {
  */
 router.post("/civilian/incident", async (req, res) => {
     if (!req.body.email || !req.body.description || !req.body.date || !req.body.involved) {
-        res.status(400).json({
-            body: "Missing parameters"
-        });
+        return res.status(400).send("Missing parameters");
     }
     try {
         req.body.status = "Open";
         const result = await(appService.createIncident(req.body));
-        res.status(200).json(result);
+        return res.status(200).json(result);
     } catch (err) {
         let errmsg = `Could not complete request due to: ${err.message}`;
-        res.status(400).send(errmsg);
+        console.log(errmsg);
+        return res.status(400).send(errmsg);
     }
 });
 
@@ -158,12 +157,19 @@ router.get("/civilian/reporter", async (req, res) => {
  *
  * Successful response will have status 200
  */
-router.put("/civilian/reporter", async (req, res) => {
+router.put("/civilian/reporter", (req, res) => {
     // TODO
-    console.log(req.body.email);
-    res.status(500).json({
-        body: `not implemented, email was ${req.body.email}`
-    });
+    if (!req.body.email | !req.body.name | !req.body.address | !req.body.phoneNumber) {
+        return res.status(400).send("Missing parameters");
+    }
+
+    return appService.createReporter(req.body)
+        .then(() => {
+            return res.status(200).send("Successful");
+        })
+        .catch((err) => {
+            return res.status(400).send(err.message);
+        });
 });
 
 /**

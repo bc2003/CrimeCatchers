@@ -303,13 +303,37 @@ async function countDemotable() {
 }
 
 /**
+ * Creates a reporter with the following info
+ * @param {Object} reporterInfo
+ * @param {string} reporterInfo.email             Email of reporter
+ * @param {string} reporterInfo.name              Name of reporter
+ * @param {string} reporterInfo.address           Address of reporter
+ * @param {string} reporterInfo.phoneNumber       Phone # of reporter
+ */
+function createReporter(reporterInfo) {
+    if (!reporterInfo.email.match(EMAIL_REGEX)) {
+        throw new Error("Invalid email");
+    }
+
+    return withOracleDB((connection) => {
+       return connection.execute(`INSERT INTO Reporter VALUES ('${reporterInfo.name}', '${reporterInfo.address}', '${reporterInfo.phoneNumber}', '${reporterInfo.email}')`,
+           [], { autoCommit: true });
+    });
+}
+
+/**
  * Creates an incident with the following info
  * @param {Object} incidentInfo              Some incident info
  * @param {string} incidentInfo.email        Email of the reporting person
  * @param {string} incidentInfo.description  Description of the incident
  * @param {string} incidentInfo.date         Date of incident (in ISO format)
  * @param {Object[]} incidentInfo.involved   Involved people
- * @param {string} incidentInfo.name
+ * @param {string} incidentInfo.involved.name Name of involved person
+ * @param {Object} incidentInfo.involved.specialAttributes Identifier for the type of Involved Person
+ *
+ * @note incidentInfo.involved.physicalBuild and incidentInfo.involved.numPriorOffenses for Suspect,
+ *       incidentInfo.involved.injuries for Victim,
+ *       incidentInfo.involved.phoneNumber for Bystander
  * 
  * @returns {Object} generated - Generated ids
  * @returns {number} generated.incidentID - incident ID
@@ -335,14 +359,19 @@ async function createIncident(incidentInfo) {
     }
 
     return await withOracleDB(async (connection) => {
+        const dateIncident = incidentInfo.date.substring(0, 10);
+        const dateFormat = "yyyy-MM-dd";
         let generatedIncidentID = await connection.execute("SELECT incidentid.nextval FROM dual", [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
             .then((result) => {
                 return result.rows[0].NEXTVAL
             });
-        console.log(generatedIncidentID);
+        for (let involved of incidentInfo.involved) {
+            // TODO: add involved persons with the right type
+        }
         await connection.execute(`INSERT INTO IncidentStatus VALUES ('${incidentInfo.description}', '${incidentInfo.status}')`, [], { autoCommit: true });
-        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${incidentInfo.date.substring(0, 10)}', 'yyyy-MM-dd'), '${incidentInfo.description}')`;
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`;
         await connection.execute(queryInfo, [], { autoCommit: true });
+        await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`);
         return {
             incidentID: generatedIncidentID
         };
@@ -404,5 +433,6 @@ module.exports = {
     updateNameDemotable, 
     countDemotable,
     createIncident,
-    recreateAllTables
+    recreateAllTables,
+    createReporter
 };
