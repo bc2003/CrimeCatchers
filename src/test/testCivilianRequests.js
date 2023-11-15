@@ -1,6 +1,7 @@
 const chai = require("chai");
 const chaiHttp = require("chai-http");
 const child_process = require("child_process");
+const {testOracleConnection, recreateAllTables} = require("../appService");
 
 const SERVER = "localhost:65535";
 
@@ -12,6 +13,9 @@ describe("CivilianRequests", function() {
     let server;
     // NOTE: remember to start the db-tunnel as well!
     before(async () => {
+        if (!testOracleConnection()) {
+            throw new Error("Could not connect to Oracle, check that db-tunnel is started");
+        }
         let start_server;
         if (onWindows) {
             start_server = "local-start.cmd";
@@ -23,10 +27,11 @@ describe("CivilianRequests", function() {
                 console.log(stderr);
                 if (err) {
                     console.log(`error! ${stderr}`);
-                    throw Error(stderr);
+                    throw new Error(stderr);
                 }
             });
         await new Promise(resolve => setTimeout(resolve, 1000));
+        await recreateAllTables();
     });
 
     after(() => {
@@ -75,17 +80,20 @@ describe("CivilianRequests", function() {
     });
 
    it("should be able to send a basic request for making an incident", function() {
-      return chai.request(SERVER)
-          .post("/civilian/incident")
-          .send({
-              email: "munce@student.ubc.ca",
-              description: "Bike theft",
-              date: new Date("10 October 2023").toISOString(),
-              involved: []
-          }).then((res) => {
-              chai.expect(res.status).to.equal(200);
-              chai.expect(res.body).to.have.property("incidentID");
-              chai.expect(res.body.incidentID).to.be.greaterThan(0);
-          });
+        let dateIncident = new Date("10 October 2023");
+        console.log(dateIncident.toISOString());
+        return chai.request(SERVER)
+           .post("/civilian/incident")
+           .send({
+               email: "munce@student.ubc.ca",
+               description: "Bike theft",
+               date: dateIncident.toISOString(),
+               involved: []
+           }).then((res) => {
+               console.log(res.text);
+               chai.expect(res.status).to.equal(200);
+               chai.expect(res.body).to.have.property("incidentID");
+               chai.expect(res.body.incidentID).to.be.greaterThan(0);
+           });
    });
 });

@@ -104,12 +104,11 @@ router.post("/civilian/incident", async (req, res) => {
         });
     }
     try {
+        req.body.status = "Open";
         const result = await(appService.createIncident(req.body));
-        res.status(200).json({
-            incidentID: result
-        });
+        res.status(200).json(result);
     } catch (err) {
-        let errmsg = `Could hot complete request due to: ${err.message}`;
+        let errmsg = `Could not complete request due to: ${err.message}`;
         res.status(400).send(errmsg);
     }
 });

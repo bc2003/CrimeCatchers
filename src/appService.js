@@ -1,6 +1,7 @@
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
 const envVariables = loadEnvFile('./.env');
+const fs = require("fs");
 
 // Database configuration setup. Ensure your .env file has the required database credentials.
 const dbConfig = {
@@ -92,7 +93,7 @@ const incidentData = {
   
   // Function to make the POST request to the server
   async function reportIncident(incidentData) {
-    const url = 'http://localhost:65535/civilian/incident'; // Replace with your actual domain and port
+    const url = 'http://localhost:65535/civilian/incident';
     try {
         const response = await fetch(url, {
             method: 'POST',
@@ -131,7 +132,6 @@ const incidentData = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Include any other headers like authorization tokens if required
         },
         body: JSON.stringify(updateData)
       });
@@ -318,25 +318,81 @@ async function countDemotable() {
  * @throws {Error} if updating the database fails
  */
 async function createIncident(incidentInfo) {
+    // validate email and date in expected formats
+
+    // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
+    // for the regex
+    if (!incidentInfo.email.match(EMAIL_REGEX)) {
+        throw new Error("Invalid email");
+    }
+
+    const dateNum = Date.parse(incidentInfo.date);
+    if (isNaN(dateNum)) {
+        throw new Error("Invalid date");
+    }
+    if (new Date(dateNum).toISOString() !== incidentInfo.date) {
+        throw new Error("Invalid format of date");
+    }
+
     return await withOracleDB(async (connection) => {
-        // validate email and date in expected formats
+        let generatedIncidentID = await connection.execute("SELECT incidentid.nextval FROM dual", [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+            .then((result) => {
+                return result.rows[0].NEXTVAL
+            });
+        console.log(generatedIncidentID);
+        await connection.execute(`INSERT INTO IncidentStatus VALUES ('${incidentInfo.description}', '${incidentInfo.status}')`, [], { autoCommit: true });
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${incidentInfo.date.substring(0, 10)}', 'yyyy-MM-dd'), '${incidentInfo.description}')`;
+        await connection.execute(queryInfo, [], { autoCommit: true });
+        return {
+            incidentID: generatedIncidentID
+        };
+    });
+}
 
-        // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
-        // for the regex
-        if (!incidentInfo.email.match(EMAIL_REGEX)) {
-            throw new Error("Invalid email");
+/**
+ * Drop and then create all the tables again.
+ * 
+ * WARNING: this WILL lead to a loss of data!
+ */
+async function recreateAllTables() {
+    return withOracleDB(async (connection) => {
+        const tables = ["IncidentStatus", "IncidentInfo", "Location", "OccurredAt", "Department",
+            "Responder", "AssignedTo", "InvolvedPerson", "Involves", "Suspect", "Victim",
+            "Bystander", "Reporter", "ReportedBy", "EquipmentInfo", "EquipmentItem",
+            "VehicleSpecs", "VehicleInfo"].reverse(); // reverse to delete dependencies first
+
+        const sequences = ["incidentID", "branchID", "professionalID", "personID", "equipmentID"];
+
+        for (let table of tables) {
+            // cannot do async due to max connection limit
+            try {
+                await withOracleDB((connection) => {
+                    return connection.execute(`DROP TABLE ${table}`);
+                });
+            } catch (ignored) {}
         }
 
-        const dateNum = Date.parse(incidentInfo.date);
-        if (isNaN(dateNum)) {
-            throw new Error("Invalid date");
+        for (let seq of sequences) {
+            try {
+                await withOracleDB((connection) => {
+                    return connection.execute(`DROP SEQUENCE ${seq}`);
+                });
+            } catch (ignored) {}
         }
 
-        const dateIncident = new Date(dateNum);
-        let queryInfo = "INSERT INTO incidentInfo"
-        // const result = await connection.execute(query);
-        // TODO
-        throw new Error("not implemented");
+        // create the tables again using the .sql file
+        const fileName = "create_tables_and_sequences.sql";
+        let commands = fs.readFileSync(fileName, 'utf-8').toString().split(";");
+        commands = commands.filter((c) => c !== "");
+        for (let command of commands) {
+            await withOracleDB(async (connection) => {
+                try {
+                    await connection.execute(command);
+                } catch (err) {
+                    console.log(`error executing ${command}`);
+                }
+            });
+        }
     });
 }
 
@@ -347,5 +403,6 @@ module.exports = {
     insertDemotable, 
     updateNameDemotable, 
     countDemotable,
-    createIncident
+    createIncident,
+    recreateAllTables
 };
