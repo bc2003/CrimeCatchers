@@ -356,12 +356,10 @@ async function createIncident(incidentInfo) {
     if (isNaN(dateNum)) {
         throw new Error("Invalid date");
     }
-    if (new Date(dateNum).toISOString() !== incidentInfo.date) {
-        throw new Error("Invalid format of date");
-    }
 
     return await withOracleDB(async (connection) => {
-        const dateIncident = incidentInfo.date.substring(0, 10);
+        // const dateIncident = incidentInfo.date.substring(0, 10);
+        const dateIncident = incidentInfo.date;
         const dateFormat = "yyyy-MM-dd";
         let generatedIncidentID = await connection.execute("SELECT incidentid.nextval FROM dual", [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
             .then((result) => {

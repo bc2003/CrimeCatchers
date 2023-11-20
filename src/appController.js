@@ -29,15 +29,6 @@ router.post("/initiate-demotable", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
-router.post('/civilian/incident', async (req, res) => {
-    try {
-        // Your logic to handle the request...
-    } catch (error) {
-        console.error('Error processing request:', error);
-        res.status(500).send('Internal Server Error');
-    }
-});
-
 
 router.post("/insert-demotable", async (req, res) => {
     const { id, name } = req.body;
@@ -108,6 +99,7 @@ router.get('/count-demotable', async (req, res) => {
  * }
  */
 router.post("/civilian/incident", async (req, res) => {
+    console.log(`Processing POST /civilian/incident with json ${req.body}`);
     if (!req.body.email || !req.body.description || !req.body.date || !req.body.involved) {
         return res.status(400).send("Missing parameters");
     }

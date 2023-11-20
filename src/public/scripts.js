@@ -107,6 +107,41 @@ async function insertDemotable(event) {
     }
 }
 
+
+// Inserts new records into the demotable.
+async function addIncident(event) {
+    event.preventDefault();
+
+    const emailValue = document.getElementById("email_add").value;
+    const descriptionValue = document.getElementById("description_add").value;
+    const dateValue = document.getElementById("date_add").value;
+
+    console.log(dateValue);
+
+    const response = await fetch('/civilian/incident', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: emailValue,
+            description: descriptionValue,
+            date: dateValue,
+            involved: []
+        })
+    });
+
+    const responseStatus = await response.status;
+    const responseData = await response.json();
+    const messageElement = document.getElementById('addIncidentResponse');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Added incident successfully with ID ${responseData.incidentID}`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
 // Updates names in the demotable.
 async function updateNameDemotable(event) {
     event.preventDefault();
@@ -161,6 +196,7 @@ async function countDemotable() {
 window.onload = function() {
     checkDbConnection();
     fetchTableData();
+    document.getElementById("addIncident").addEventListener("submit", addIncident);
     document.getElementById("resetDemotable").addEventListener("click", resetDemotable);
     document.getElementById("insertDemotable").addEventListener("submit", insertDemotable);
     document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable);
