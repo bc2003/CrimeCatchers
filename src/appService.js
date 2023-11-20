@@ -1,7 +1,8 @@
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
-const fetch = require('node-fetch');
+
 const envVariables = loadEnvFile('./.env');
+const fs = require("fs");
 
 // Database configuration setup. Ensure your .env file has the required database credentials.
 const dbConfig = {
@@ -9,6 +10,9 @@ const dbConfig = {
     password: envVariables.ORACLE_PASS,
     connectString: `${envVariables.ORACLE_HOST}:${envVariables.ORACLE_PORT}/${envVariables.ORACLE_DBNAME}`
 };
+
+// See https://stackoverflow.com/a/1373724
+const EMAIL_REGEX = "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"
 
 
 // ----------------------------------------------------------
@@ -90,6 +94,7 @@ const incidentData = {
   
   // Function to make the POST request to the server
   async function reportIncident(incidentData) {
+
     const url = 'http://localhost:65535/civilian/incident'; // Replace with your actual domain and port
     try {
         const response = await fetch(url, {
@@ -115,13 +120,6 @@ const incidentData = {
     }
 }
   
-  // Call the function with the incident data
-  reportIncident(incidentData).then(responseData => {
-    if (responseData) {
-      // Do something with the responseData.incidentID
-    }
-  });
-
 
   async function updateIncident(incidentID, newDescription, date) {
     const updateData = {
@@ -136,7 +134,6 @@ const incidentData = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // Include any other headers like authorization tokens if required
         },
         body: JSON.stringify(updateData)
       });
@@ -307,11 +304,137 @@ async function countDemotable() {
     });
 }
 
+/**
+ * Creates a reporter with the following info
+ * @param {Object} reporterInfo
+ * @param {string} reporterInfo.email             Email of reporter
+ * @param {string} reporterInfo.name              Name of reporter
+ * @param {string} reporterInfo.address           Address of reporter
+ * @param {string} reporterInfo.phoneNumber       Phone # of reporter
+ */
+function createReporter(reporterInfo) {
+    if (!reporterInfo.email.match(EMAIL_REGEX)) {
+        throw new Error("Invalid email");
+    }
+
+    return withOracleDB((connection) => {
+       return connection.execute(`INSERT INTO Reporter VALUES ('${reporterInfo.name}', '${reporterInfo.address}', '${reporterInfo.phoneNumber}', '${reporterInfo.email}')`,
+           [], { autoCommit: true });
+    });
+}
+
+/**
+ * Creates an incident with the following info
+ * @param {Object} incidentInfo              Some incident info
+ * @param {string} incidentInfo.email        Email of the reporting person
+ * @param {string} incidentInfo.description  Description of the incident
+ * @param {string} incidentInfo.date         Date of incident (in ISO format)
+ * @param {Object[]} incidentInfo.involved   Involved people
+ * @param {string} incidentInfo.involved.name Name of involved person
+ * @param {Object} incidentInfo.involved.specialAttributes Identifier for the type of Involved Person
+ *
+ * @note incidentInfo.involved.physicalBuild and incidentInfo.involved.numPriorOffenses for Suspect,
+ *       incidentInfo.involved.injuries for Victim,
+ *       incidentInfo.involved.phoneNumber for Bystander
+ * 
+ * @returns {Object} generated - Generated ids
+ * @returns {number} generated.incidentID - incident ID
+ * @returns {number[]} generated.involvedIDs - IDs for all involved people
+ *
+ * @throws {Error} if updating the database fails
+ */
+async function createIncident(incidentInfo) {
+    // validate email and date in expected formats
+
+    // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
+    // for the regex
+    if (!incidentInfo.email.match(EMAIL_REGEX)) {
+        throw new Error("Invalid email");
+    }
+
+    const dateNum = Date.parse(incidentInfo.date);
+    if (isNaN(dateNum)) {
+        throw new Error("Invalid date");
+    }
+    if (new Date(dateNum).toISOString() !== incidentInfo.date) {
+        throw new Error("Invalid format of date");
+    }
+
+    return await withOracleDB(async (connection) => {
+        const dateIncident = incidentInfo.date.substring(0, 10);
+        const dateFormat = "yyyy-MM-dd";
+        let generatedIncidentID = await connection.execute("SELECT incidentid.nextval FROM dual", [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
+            .then((result) => {
+                return result.rows[0].NEXTVAL
+            });
+        for (let involved of incidentInfo.involved) {
+            // TODO: add involved persons with the right type
+        }
+        await connection.execute(`INSERT INTO IncidentStatus VALUES ('${incidentInfo.description}', '${incidentInfo.status}')`, [], { autoCommit: true });
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`;
+        await connection.execute(queryInfo, [], { autoCommit: true });
+        await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`);
+        return {
+            incidentID: generatedIncidentID
+        };
+    });
+}
+
+/**
+ * Drop and then create all the tables again.
+ * 
+ * WARNING: this WILL lead to a loss of data!
+ */
+async function recreateAllTables() {
+    return withOracleDB(async (connection) => {
+        const tables = ["IncidentStatus", "IncidentInfo", "Location", "OccurredAt", "Department",
+            "Responder", "AssignedTo", "InvolvedPerson", "Involves", "Suspect", "Victim",
+            "Bystander", "Reporter", "ReportedBy", "EquipmentInfo", "EquipmentItem",
+            "VehicleSpecs", "VehicleInfo"].reverse(); // reverse to delete dependencies first
+
+        const sequences = ["incidentID", "branchID", "professionalID", "personID", "equipmentID"];
+
+        for (let table of tables) {
+            // cannot do async due to max connection limit
+            try {
+                await withOracleDB((connection) => {
+                    return connection.execute(`DROP TABLE ${table}`);
+                });
+            } catch (ignored) {}
+        }
+
+        for (let seq of sequences) {
+            try {
+                await withOracleDB((connection) => {
+                    return connection.execute(`DROP SEQUENCE ${seq}`);
+                });
+            } catch (ignored) {}
+        }
+
+        // create the tables again using the .sql file
+        const fileName = "create_tables_and_sequences.sql";
+        let commands = fs.readFileSync(fileName, 'utf-8').toString().split(";");
+        commands = commands.filter((c) => c !== "");
+        for (let command of commands) {
+            await withOracleDB(async (connection) => {
+                try {
+                    await connection.execute(command);
+                } catch (err) {
+                    console.log(`error executing ${command}`);
+                }
+            });
+        }
+    });
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
     initiateDemotable, 
     insertDemotable, 
     updateNameDemotable, 
-    countDemotable
+    countDemotable,
+    createIncident,
+    recreateAllTables,
+    createReporter
 };
