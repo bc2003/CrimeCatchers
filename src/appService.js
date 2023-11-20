@@ -1,5 +1,6 @@
 const oracledb = require('oracledb');
 const loadEnvFile = require('./utils/envUtil');
+
 const envVariables = loadEnvFile('./.env');
 const fs = require("fs");
 
@@ -93,7 +94,8 @@ const incidentData = {
   
   // Function to make the POST request to the server
   async function reportIncident(incidentData) {
-    const url = 'http://localhost:65535/civilian/incident';
+
+    const url = 'http://localhost:65535/civilian/incident'; // Replace with your actual domain and port
     try {
         const response = await fetch(url, {
             method: 'POST',

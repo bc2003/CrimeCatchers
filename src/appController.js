@@ -29,6 +29,15 @@ router.post("/initiate-demotable", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+router.post('/civilian/incident', async (req, res) => {
+    try {
+        // Your logic to handle the request...
+    } catch (error) {
+        console.error('Error processing request:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
 
 router.post("/insert-demotable", async (req, res) => {
     const { id, name } = req.body;
@@ -39,6 +48,7 @@ router.post("/insert-demotable", async (req, res) => {
         res.status(500).json({ success: false });
     }
 });
+
 
 
 router.post("/update-name-demotable", async (req, res) => {
