@@ -91,7 +91,7 @@ const incidentData = {
       // ... other involved persons
     ]
   };
-  
+
   // Function to make the POST request to the server
   async function reportIncident(incidentData) {
 
@@ -119,7 +119,7 @@ const incidentData = {
         return null;
     }
 }
-  
+
 
   async function updateIncident(incidentID, newDescription, date) {
     const updateData = {
@@ -128,7 +128,7 @@ const incidentData = {
       newDescription,
       Status: 'Cancelled' // Status is hardcoded as "Cancelled"
     };
-  
+
     try {
       const response = await fetch('/incident-update', {
         method: 'POST',
@@ -137,7 +137,7 @@ const incidentData = {
         },
         body: JSON.stringify(updateData)
       });
-  
+
       if (response.ok) {
         console.log('Incident updated successfully.');
       } else {
@@ -154,7 +154,7 @@ const incidentData = {
         method: 'DELETE',
         // Include headers if necessary, like authorization
       });
-  
+
       if (response.ok) {
         console.log('Incident deleted successfully.');
       } else {
@@ -164,14 +164,14 @@ const incidentData = {
       console.error('Error deleting the incident:', error);
     }
   }
-  
+
   async function getReporterDetails(email) {
     try {
       const response = await fetch(`/reporter?email=${encodeURIComponent(email)}`, {
         method: 'GET',
         // Include headers if necessary
       });
-  
+
       if (response.ok) {
         const reporterDetails = await response.json();
         console.log('Reporter details:', reporterDetails);
@@ -185,8 +185,8 @@ const incidentData = {
       console.error('Error getting reporter details:', error);
     }
   }
-  
-  
+
+
   async function updateReporterDetails(name, address, phoneNumber, email) {
     const reporterData = {
       Name: name,
@@ -194,7 +194,7 @@ const incidentData = {
       PhoneNumber: phoneNumber,
       Email: email
     };
-  
+
     try {
       const response = await fetch('/reporter', {
         method: 'PUT',
@@ -204,7 +204,7 @@ const incidentData = {
         },
         body: JSON.stringify(reporterData)
       });
-  
+
       if (response.ok) {
         console.log('Reporter details updated successfully.');
       } else {
@@ -215,20 +215,20 @@ const incidentData = {
     }
   }
 
-  
+
   async function getIncidents(sort_by, status, display) {
     const queryParams = new URLSearchParams({
       sort_by,
       status,
       display: display.join(',') // Convert array to comma-separated string
     });
-  
+
     try {
       const response = await fetch(`/municipal/incident?${queryParams}`, {
         method: 'GET',
         // Include headers if necessary, such as authorization tokens
       });
-  
+
       if (response.ok) {
         const incidents = await response.json();
         console.log('Incidents retrieved:', incidents);
@@ -247,13 +247,13 @@ const incidentData = {
       sort_by,
       display: display.join(',') // Convert array to comma-separated string
     });
-  
+
     try {
       const response = await fetch(`/municipal/equipment?${queryParams}`, {
         method: 'GET',
         // Include headers if necessary
       });
-  
+
       if (response.ok) {
         const equipmentDetails = await response.json();
         console.log('Equipment details retrieved:', equipmentDetails);
@@ -265,7 +265,7 @@ const incidentData = {
       console.error('Error retrieving equipment details:', error);
     }
   }
-  
+
 
 async function insertDemotable(id, name) {
     return await withOracleDB(async (connection) => {
@@ -336,7 +336,7 @@ function createReporter(reporterInfo) {
  * @note incidentInfo.involved.physicalBuild and incidentInfo.involved.numPriorOffenses for Suspect,
  *       incidentInfo.involved.injuries for Victim,
  *       incidentInfo.involved.phoneNumber for Bystander
- * 
+ *
  * @returns {Object} generated - Generated ids
  * @returns {number} generated.incidentID - incident ID
  * @returns {number[]} generated.involvedIDs - IDs for all involved people
@@ -382,7 +382,7 @@ async function createIncident(incidentInfo) {
 
 /**
  * Drop and then create all the tables again.
- * 
+ *
  * WARNING: this WILL lead to a loss of data!
  */
 async function recreateAllTables() {
