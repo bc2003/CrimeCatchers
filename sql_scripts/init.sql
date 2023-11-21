@@ -1,4 +1,5 @@
 -- Create Table Statements
+-- Note: Oracle does not allow ON UPDATE, hence the absence of it in our table initializations
 CREATE TABLE IncidentStatus(
     description VARCHAR(200) PRIMARY KEY,
     statusValue VARCHAR(20)
