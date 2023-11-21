@@ -142,10 +142,124 @@ async function addIncident(event) {
     }
 }
 
+
+// Inserts new records into the demotable.
+async function updateIncident(event) {
+    event.preventDefault();
+    const date = document.getElementById("date_update").value;
+    const incidentID = document.getElementById("incidentID_update").value;
+    const new_desc = document.getElementById("newDescription").value;
+    const status = document.getElementById("status_update").value;
+    const response = await fetch('/civilian/incident-update', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            date: date,
+            description: new_desc,
+            status: status,
+            incidentID: incidentID
+        })
+    });
+
+    const responseStatus = await response.status;
+    const responseData = await response.json();
+    const messageElement = document.getElementById('updateIncidentResponse');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Updated incident successfully with ID`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+async function addReporter(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const reporterEmail = document.getElementById("reporterEmail").value;
+    const reporterName = document.getElementById("reporterName").value;
+    const reporterAddress = document.getElementById("reporterAddress").value;
+    const phone = document.getElementById("reporterPhone").value;
+    const response = await fetch('/civilian/reporter', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            email: reporterEmail,
+            name: reporterName,
+            address: reporterAddress,
+            phoneNumber: phone
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('addReporter_text');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Added the reporter`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+async function deleteIncident(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const deleteID = document.getElementById("delete_ID").value;
+    const response = await fetch('/civilian/incident', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deleteID: deleteID,
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('deleted_Incident');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `The incident was deleted`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+async function getReporter(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const email = document.getElementById("getEmail").value;
+    const response = await fetch('/civilian/reporter', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deleteID: email,
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('getReporterDetails');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Added reporter Details are ${responseData.name}, ${responseData.address},  ${responseData.phoneNumber}`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+
+
+
+
+
 // Updates names in the demotable.
 async function updateNameDemotable(event) {
     event.preventDefault();
-
     const oldNameValue = document.getElementById('updateOldName').value;
     const newNameValue = document.getElementById('updateNewName').value;
 
@@ -196,11 +310,18 @@ async function countDemotable() {
 window.onload = function() {
     checkDbConnection();
     fetchTableData();
+    document.getElementById("addReporter").addEventListener("submit", addReporter);
+    document.getElementById("updateIncident").addEventListener("submit", updateIncident);
     document.getElementById("addIncident").addEventListener("submit", addIncident);
     document.getElementById("resetDemotable").addEventListener("click", resetDemotable);
     document.getElementById("insertDemotable").addEventListener("submit", insertDemotable);
     document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable);
     document.getElementById("countDemotable").addEventListener("click", countDemotable);
+    document.getElementById("deleteIncident").addEventListener("submit", deleteIncident);
+    document.getElementById("getReporterDetailsForm").addEventListener("submit", getReporter);
+
+
+
 };
 
 // General function to refresh the displayed table data. 

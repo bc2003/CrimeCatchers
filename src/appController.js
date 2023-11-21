@@ -165,6 +165,8 @@ router.put("/civilian/reporter", (req, res) => {
         return res.status(400).send("Missing parameters");
     }
 
+    console.log("In Reporter...IN THEM")
+
     return appService.createReporter(req.body)
         .then(() => {
             return res.status(200).send("Successful");
