@@ -148,6 +148,192 @@ CREATE SEQUENCE professionalID START WITH 1;
 CREATE SEQUENCE personID START WITH 1;
 CREATE SEQUENCE equipmentID START WITH 1;
 
--- Populate Table Statements (TODO)
+-- Populate Table Statements
+
+-- IncidentStatus Table
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('stabbing', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('murder', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('shooting', 'closed');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('burglary', 'closed');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('bomb threat', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('arson', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('vehicle theft', 'closed');
+
+-- IncidentInfo Table
+INSERT INTO IncidentInfo(incidentID, dateIncident, description)
+VALUES (1, 20-OCT-2023, 'stabbing');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (2, 17-NOV-2011, 'arson');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (3, 29-FEB-2020, 'shooting');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (4, 09-MAY-2017, 'bomb threat');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (5, 05-JAN-2010, 'vehicle theft');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (6, 16-NOV-2010, 'burglary');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (7, 08-JUN-2023, 'murder');
+
+-- Location Table
+INSERT INTO Location(address, neighbourhood)
+VALUES ('1755 E 55th Ave.', 'Victoria-Fraserview');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('142 Water St.', 'Downtown');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('100 W 49th Ave.', 'Marpole');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('6426 Kerr St.', 'Killarney');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('712 Lost Lagoon Path', 'Stanley Park');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('1688 W 29th Ave.', 'Shaughnessy');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('2996 W 5th Ave.', 'Kitsilano');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('2120 Cambie St.', 'Mount Pleasant');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('1081 Burrard St.', 'Downtown');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('238 E Cordova St.', 'Downtown');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('1475 W 10th Ave.', 'Fairview');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('5425 Carnarvon St.', 'Kerrisdale');
+
+-- OccurredAt Table
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (1, '142 Water St.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (2, '6426 Kerr St.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (3, '100 W 49th Ave.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (4, '1755 E 55th Ave.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (5, '2996 W 5th Ave.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (6, '1688 W 29th Ave.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (7, '712 Lost Lagoon Path');
+
+-- Department Table
+INSERT INTO Department(branchID, specialty, address)
+VALUES (1, 'police', '2120 Cambie St.');
+INSERT INTO Department(branchID, specialty, address)
+VALUES (2, 'hospital', '1081 Burrard St.');
+INSERT INTO Department(branchID, specialty, address)
+VALUES (3, 'police', '238 E Cordova St.');
+INSERT INTO Department(branchID, specialty, address)
+VALUES (4, 'fire', '1475 W 10th Ave.');
+INSERT INTO Department(branchID, specialty, address)
+VALUES (5, 'fire', '5425 Carnarvon St.');
+
+-- Responder Table
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (21, 'Jim Jones', 'firefighter', 4);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (23, 'Jared Fogle', 'firefighter', 5);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (31, 'Jason Somerville', 'police officer', 3);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (36, 'Charity Johnson', 'police officer', 3);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (37, 'Chairiddee Jawnsen', 'police officer', 1);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (40, 'Melina del Cortez', 'nurse', 3);
+INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)
+VALUES (53, 'Tyler Chu', 'doctor', 3);
+
+-- AssignedTo Table
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (1, 40);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (1, 53);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (2, 21);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (3, 53);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (4, 31);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (5, 36);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (6, 36);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (7, 37);
+INSERT INTO AssignedTo(incidentID, professionalID)
+VALUES (2, 23);
+
+-- InvolvedPerson Table
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('John Smith', 10, '1755 E 55th Ave.');
+(INSERT INTO InvolvedPerson(name, personID, address)
+VALUES 'Jon Smith', 12, '142 Water St.');
+(INSERT INTO InvolvedPerson(name, personID, address)
+VALUES 'Yohan Smith', 13, '142 Water St.');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Gianni Smith', 14, '100 W 49th Ave.');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Johnny Smith', 16, '6426 Kerr St.');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Joanna Smith', 18, '712 Lost Lagoon Path');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Joann Smith', 19, '1688 W 29th Ave.');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Joanne Smith Sr.', 21, '2996 W 5th Ave.');
+INSERT INTO InvolvedPerson(name, personID, address)
+VALUES ('Joanne Smith Jr.', 22, '2996 W 5th Ave.');
+
+-- Involves Table
+INSERT INTO Involves(incidentID, personID)
+VALUES (1, 10);
+INSERT INTO Involves(incidentID, personID)
+VALUES (2, 12);
+INSERT INTO Involves(incidentID, personID)
+VALUES (2, 13);
+INSERT INTO Involves(incidentID, personID)
+VALUES (3, 14);
+INSERT INTO Involves(incidentID, personID)
+VALUES (4, 16);
+INSERT INTO Involves(incidentID, personID)
+VALUES (5, 18);
+INSERT INTO Involves(incidentID, personID)
+VALUES (6, 19);
+INSERT INTO Involves(incidentID, personID)
+VALUES (7, 21);
+INSERT INTO Involves(incidentID, personID)
+VALUES (7, 22);
+
+-- Suspect Table
+INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
+VALUES (12, 'stocky', 5);
+INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
+VALUES (13, 'stocky', 8);
+INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
+VALUES (22, 'thin', 0);
+
+-- Victim Table
+INSERT INTO Victim(personID, injuries)
+VALUES (21, 'internal bleeding');
+
+-- Bystander Table
+INSERT INTO Bystander(personID, phoneNumber)
+VALUES (10, '2363223280');
+INSERT INTO Bystander(personID, phoneNumber)
+VALUES (14, '7786043914');
+INSERT INTO Bystander(personID, phoneNumber)
+VALUES (16, '6043210987');
+INSERT INTO Bystander(personID, phoneNumber)
+VALUES (18, '6046046046'),
+INSERT INTO Bystander(personID, phoneNumber)
+VALUES (19, '7787787788');
 
 -- Clear Database Statement (TODO - time permitting)
