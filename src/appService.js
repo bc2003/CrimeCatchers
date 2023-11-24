@@ -4,6 +4,8 @@ const loadEnvFile = require('./utils/envUtil');
 const envVariables = loadEnvFile('./.env');
 const fs = require("fs");
 
+// load queries here from sql_scripts/queries.sql (TODO)
+
 // Database configuration setup. Ensure your .env file has the required database credentials.
 const dbConfig = {
     user: envVariables.ORACLE_USER,

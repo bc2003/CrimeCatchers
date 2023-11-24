@@ -1,5 +1,14 @@
 -- INSERT QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
+INSERT INTO ReportedBy (
+    incidentID,
+    email,
+    dateReported
+) VALUES (
+   :incidentID,
+   :email,
+   :dateReported
+);
 
 -- DELETE QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
