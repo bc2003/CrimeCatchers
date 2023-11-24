@@ -336,4 +336,76 @@ VALUES (18, '6046046046'),
 INSERT INTO Bystander(personID, phoneNumber)
 VALUES (19, '7787787788');
 
+-- Reporter Table
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Captain Marvel', '123 Hero Lane, Super City', '555-1111-987', 'captain.marvel@gmail.com');
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Iron Man', '456 Stark Tower, New York City', '555-2222-987', 'iron.man@gmail.com');
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Wonder Woman', '789 Amazon Island, Paradise', '555-3333-987', 'wonder.woman@gmail.com');
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Spider-Man', '101 Web Avenue, Marvel City', '555-4444-987', 'spider.man@gmail.com');
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Black Widow', '202 Spy Street, Shadowland', '555-5555-987', 'black.widow@gmail.com');
+
+-- ReportedBy Table
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (1, 'captain.marvel@gmail.com', 20-OCT-2023);
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (2, 'iron.man@gmail.com', 18-NOV-2011);
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (3, 'wonder.woman@gmail.com', 29-FEB-2020);
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (4, 'spider.man@gmail.com', 09-MAY-2017);
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (5, 'black.widow@gmail.com', 07-JAN-2010);
+
+-- EquipmentInfo Table
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('fire-extinguisher', 10, 'red');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('grenade', 2, 'black');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('hose', 20, 'yellow');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('laptop', 1, 'black');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('gauze', 1, 'white');
+
+-- EquipmentItem Table
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1234, 4, 'fire-extinguisher');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1235, 3, 'grenade');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1236, 5, 'hose');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1237, 4, 'laptop');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1238, 2, 'gauze');
+
+-- VehicleSpecs Table
+INSERT INTO VehicleSpecs(model, numSeats)
+VALUES ('Toyota Corolla', 5);
+INSERT INTO VehicleSpecs(model, numSeats)
+VALUES ('Toyota Camry Hybrid', 5);
+INSERT INTO VehicleSpecs(model, numSeats)
+VALUES ('ambulance', 7);
+INSERT INTO VehicleSpecs(model, numSeats)
+VALUES ('firetruck', 15);
+INSERT INTO VehicleSpecs(model, numSeats)
+VALUES ('Dodge Charger', 5);
+
+-- VehicleInfo Table
+INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
+VALUES ('DONDA4', 'Toyota Corolla', 'black', 1);
+INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
+VALUES ('YANDH1', 'Toyota Camry Hybrid', 'grey', 3);
+INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
+VALUES ('DRI22Y', 'ambulance', 'white', 2);
+INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
+VALUES ('CHANC3', 'firetruck', 'red', 4);
+INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
+VALUES ('SHREK6', 'Dodge Charger', 'navy blue', 2);
+
 -- Clear Database Statement (TODO - time permitting)
