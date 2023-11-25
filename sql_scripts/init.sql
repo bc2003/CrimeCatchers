@@ -1,4 +1,50 @@
--- Create Table Statements
+-- Clear Database Statement
+-- Source: https://stackoverflow.com/questions/31890032/how-to-delete-all-data-in-oracle-database-with-sql
+BEGIN
+    FOR cur_rec IN (SELECT object_name, object_type
+                    FROM user_objects
+                    WHERE object_type IN
+                          ('TABLE',
+                           'VIEW',
+                           'PACKAGE',
+                           'PROCEDURE',
+                           'FUNCTION',
+                           'SEQUENCE',
+                           'SYNONYM',
+                           'PACKAGE BODY'
+                              ))
+        LOOP
+            BEGIN
+                IF cur_rec.object_type = 'TABLE'
+                THEN
+                    EXECUTE IMMEDIATE    'DROP '
+                        || cur_rec.object_type
+                        || ' "'
+                        || cur_rec.object_name
+                        || '" CASCADE CONSTRAINTS';
+                ELSE
+                    EXECUTE IMMEDIATE    'DROP '
+                        || cur_rec.object_type
+                        || ' "'
+                        || cur_rec.object_name
+                        || '"';
+                END IF;
+            EXCEPTION
+                WHEN OTHERS
+                    THEN
+                        DBMS_OUTPUT.put_line (   'FAILED: DROP '
+                            || cur_rec.object_type
+                            || ' "'
+                            || cur_rec.object_name
+                            || '"'
+                            );
+            END;
+        END LOOP;
+END;
+
+/
+
+-- CREATE TABLE Statements
 -- Note: Oracle does not allow ON UPDATE, hence the absence of it in our table initializations
 CREATE TABLE IncidentStatus(
     description VARCHAR(200) PRIMARY KEY,
@@ -30,7 +76,7 @@ CREATE TABLE OccurredAt(
 
 CREATE TABLE Department(
     branchID INT PRIMARY KEY,
-    speciality VARCHAR(20),
+    specialty VARCHAR(20),
     locatedAtAddress VARCHAR(100) NOT NULL,
     FOREIGN KEY (locatedAtAddress) REFERENCES Location(address) 
     );
@@ -148,8 +194,7 @@ CREATE SEQUENCE professionalID START WITH 1;
 CREATE SEQUENCE personID START WITH 1;
 CREATE SEQUENCE equipmentID START WITH 1;
 
--- Populate Table Statements
-
+-- Populate Table Statements (INSERT INTO)
 -- IncidentStatus Table
 INSERT INTO IncidentStatus(description, statusValue) 
 VALUES ('stabbing', 'in-progress');
@@ -168,19 +213,19 @@ VALUES ('vehicle theft', 'closed');
 
 -- IncidentInfo Table
 INSERT INTO IncidentInfo(incidentID, dateIncident, description)
-VALUES (1, 20-OCT-2023, 'stabbing');
+VALUES (1, TO_DATE('20-OCT-2023', 'DD-MON-YYYY'), 'stabbing');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (2, 17-NOV-2011, 'arson');
+VALUES (2, TO_DATE('17-NOV-2011', 'DD-MON-YYYY'), 'arson');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (3, 29-FEB-2020, 'shooting');
+VALUES (3, TO_DATE('29-FEB-2020', 'DD-MON-YYYY'), 'shooting');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (4, 09-MAY-2017, 'bomb threat');
+VALUES (4, TO_DATE('09-MAY-2017', 'DD-MON-YYYY'), 'bomb threat');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (5, 05-JAN-2010, 'vehicle theft');
+VALUES (5, TO_DATE('05-JAN-2010', 'DD-MON-YYYY'), 'vehicle theft');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (6, 16-NOV-2010, 'burglary');
+VALUES (6, TO_DATE('16-NOV-2010', 'DD-MON-YYYY'), 'burglary');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (7, 08-JUN-2023, 'murder');
+VALUES (7, TO_DATE('08-JUN-2023', 'DD-MON-YYYY'), 'murder');
 
 -- Location Table
 INSERT INTO Location(address, neighbourhood)
@@ -225,15 +270,15 @@ INSERT INTO OccurredAt(incidentID, address)
 VALUES (7, '712 Lost Lagoon Path');
 
 -- Department Table
-INSERT INTO Department(branchID, specialty, address)
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (1, 'police', '2120 Cambie St.');
-INSERT INTO Department(branchID, specialty, address)
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (2, 'hospital', '1081 Burrard St.');
-INSERT INTO Department(branchID, specialty, address)
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (3, 'police', '238 E Cordova St.');
-INSERT INTO Department(branchID, specialty, address)
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (4, 'fire', '1475 W 10th Ave.');
-INSERT INTO Department(branchID, specialty, address)
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (5, 'fire', '5425 Carnarvon St.');
 
 -- Responder Table
@@ -273,28 +318,34 @@ INSERT INTO AssignedTo(incidentID, professionalID)
 VALUES (2, 23);
 
 -- InvolvedPerson Table
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('John Smith', 10, '1755 E 55th Ave.');
-(INSERT INTO InvolvedPerson(name, personID, address)
-VALUES 'Jon Smith', 12, '142 Water St.');
-(INSERT INTO InvolvedPerson(name, personID, address)
-VALUES 'Yohan Smith', 13, '142 Water St.');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
+VALUES ('Jonathan Smith', 11, '1755 E 55th Ave.');
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
+VALUES ('Jon Smith', 12, '142 Water St.');
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
+VALUES ('Yohan Smith', 13, '142 Water St.');
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Gianni Smith', 14, '100 W 49th Ave.');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Johnny Smith', 16, '6426 Kerr St.');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Joanna Smith', 18, '712 Lost Lagoon Path');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Joann Smith', 19, '1688 W 29th Ave.');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Joanne Smith Sr.', 21, '2996 W 5th Ave.');
-INSERT INTO InvolvedPerson(name, personID, address)
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
 VALUES ('Joanne Smith Jr.', 22, '2996 W 5th Ave.');
+INSERT INTO InvolvedPerson(name, personID, presentAtAddress)
+VALUES ('JR Smith', 23, '712 Lost Lagoon Path');
 
 -- Involves Table
 INSERT INTO Involves(incidentID, personID)
 VALUES (1, 10);
+INSERT INTO Involves(incidentID, personID)
+VALUES (1, 11);
 INSERT INTO Involves(incidentID, personID)
 VALUES (2, 12);
 INSERT INTO Involves(incidentID, personID)
@@ -311,16 +362,30 @@ INSERT INTO Involves(incidentID, personID)
 VALUES (7, 21);
 INSERT INTO Involves(incidentID, personID)
 VALUES (7, 22);
+INSERT INTO Involves(incidentID, personID)
+VALUES (5, 23);
 
 -- Suspect Table
+INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
+VALUES (11, 'medium', 0);
 INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
 VALUES (12, 'stocky', 5);
 INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
 VALUES (13, 'stocky', 8);
 INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
 VALUES (22, 'thin', 0);
+INSERT INTO Suspect(personID, physicalBuild, numPriorOffenses)
+VALUES (23, 'thin', 2);
 
 -- Victim Table
+INSERT INTO Victim(personID, injuries)
+VALUES (11, 'multiple stab wounds');
+INSERT INTO Victim(personID, injuries)
+VALUES (12, 'first-degree burn');
+INSERT INTO Victim(personID, injuries)
+VALUES (13, 'first-degree burn');
+INSERT INTO Victim(personID, injuries)
+VALUES (19, 'concussion');
 INSERT INTO Victim(personID, injuries)
 VALUES (21, 'internal bleeding');
 
@@ -332,33 +397,33 @@ VALUES (14, '7786043914');
 INSERT INTO Bystander(personID, phoneNumber)
 VALUES (16, '6043210987');
 INSERT INTO Bystander(personID, phoneNumber)
-VALUES (18, '6046046046'),
+VALUES (18, '6046046046');
 INSERT INTO Bystander(personID, phoneNumber)
 VALUES (19, '7787787788');
 
 -- Reporter Table
 INSERT INTO Reporter(name, address, phoneNumber, email)
-VALUES ('Captain Marvel', '123 Hero Lane, Super City', '555-1111-987', 'captain.marvel@gmail.com');
+VALUES ('Captain Marvel', '123 Hero Lane, Super City', '5551111987', 'captain.marvel@gmail.com');
 INSERT INTO Reporter(name, address, phoneNumber, email)
-VALUES ('Iron Man', '456 Stark Tower, New York City', '555-2222-987', 'iron.man@gmail.com');
+VALUES ('Iron Man', '456 Stark Tower, New York City', '5552222987', 'iron.man@gmail.com');
 INSERT INTO Reporter(name, address, phoneNumber, email)
-VALUES ('Wonder Woman', '789 Amazon Island, Paradise', '555-3333-987', 'wonder.woman@gmail.com');
+VALUES ('Wonder Woman', '789 Amazon Island, Paradise', '5553333987', 'wonder.woman@gmail.com');
 INSERT INTO Reporter(name, address, phoneNumber, email)
-VALUES ('Spider-Man', '101 Web Avenue, Marvel City', '555-4444-987', 'spider.man@gmail.com');
+VALUES ('Spider-Man', '101 Web Avenue, Marvel City', '5554444987', 'spider.man@gmail.com');
 INSERT INTO Reporter(name, address, phoneNumber, email)
-VALUES ('Black Widow', '202 Spy Street, Shadowland', '555-5555-987', 'black.widow@gmail.com');
+VALUES ('Black Widow', '202 Spy Street, Shadowland', '5555555987', 'black.widow@gmail.com');
 
 -- ReportedBy Table
 INSERT INTO ReportedBy(incidentID, email, dateReported)
-VALUES (1, 'captain.marvel@gmail.com', 20-OCT-2023);
+VALUES (1, 'captain.marvel@gmail.com', TO_DATE('20-OCT-2023', 'DD-MON-YYYY'));
 INSERT INTO ReportedBy(incidentID, email, dateReported)
-VALUES (2, 'iron.man@gmail.com', 18-NOV-2011);
+VALUES (2, 'iron.man@gmail.com', TO_DATE('18-NOV-2011', 'DD-MON-YYYY'));
 INSERT INTO ReportedBy(incidentID, email, dateReported)
-VALUES (3, 'wonder.woman@gmail.com', 29-FEB-2020);
+VALUES (3, 'wonder.woman@gmail.com', TO_DATE('29-FEB-2020', 'DD-MON-YYYY'));
 INSERT INTO ReportedBy(incidentID, email, dateReported)
-VALUES (4, 'spider.man@gmail.com', 09-MAY-2017);
+VALUES (4, 'spider.man@gmail.com', TO_DATE('09-MAY-2017', 'DD-MON-YYYY'));
 INSERT INTO ReportedBy(incidentID, email, dateReported)
-VALUES (5, 'black.widow@gmail.com', 07-JAN-2010);
+VALUES (5, 'black.widow@gmail.com', TO_DATE('07-JAN-2010', 'DD-MON-YYYY'));
 
 -- EquipmentInfo Table
 INSERT INTO EquipmentInfo(type, weight, color)
@@ -407,5 +472,3 @@ INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
 VALUES ('CHANC3', 'firetruck', 'red', 4);
 INSERT INTO VehicleInfo(licensePlate, model, color, ownedByBranchID)
 VALUES ('SHREK6', 'Dodge Charger', 'navy blue', 2);
-
--- Clear Database Statement (TODO - time permitting)
