@@ -127,7 +127,17 @@ router.post("/civilian/incident", async (req, res) => {
  * }
  */
 router.delete("/civilian/incident", async (req, res) => {
-    // TODO
+    if (!req.body.incidentID) {
+        return res.status(400).send("Missing parameters");
+    }
+
+    try {
+        const result = await appService.deleteIncident(req.body);
+        return res.status(200).json(result);
+    } catch (err) {
+        const errorMsg = `Could not delete incident due to ${err.message}`;
+        return res.status(400).send(errorMsg);
+    }
 });
 
 
@@ -145,7 +155,16 @@ router.delete("/civilian/incident", async (req, res) => {
  * }
  */
 router.get("/civilian/reporter", async (req, res) => {
-    // TODO
+    if (!req.body.email) {
+        return res.status(400).send("Missing parameters");
+    }
+
+    try {
+        const result = await appService.getReporter(req.body.email);
+        return res.status(200).json(result);
+    } catch (err) {
+        return res.status(400).send(`Could not service request: ${err.message}`);
+    }
 });
 
 /**
@@ -164,8 +183,6 @@ router.put("/civilian/reporter", (req, res) => {
     if (!req.body.email | !req.body.name | !req.body.address | !req.body.phoneNumber) {
         return res.status(400).send("Missing parameters");
     }
-
-    console.log("In Reporter...IN THEM")
 
     return appService.createReporter(req.body)
         .then(() => {
@@ -194,17 +211,20 @@ router.put("/civilian/incident-update", async (req, res) => {
         });
     }
 
-    // stub
-    res.status(200).json({
-        
-    });
+    return appService.updateIncident(req.body)
+        .then(() => {
+            return res.status(200).send("Successful");
+        })
+        .catch((err) => {
+            return res.status(400).send(err.message);
+        });
 });
 
 /**
  * Expected request:
  * {
  *     name: string,
- *     location: string, (optional if updating)
+ *     location: string
  *     // ONE OF THE FOLLOWING:
  *     physicalBuild: string, numPriorOffenses: number
  *     OR
@@ -219,6 +239,18 @@ router.put("/civilian/incident-update", async (req, res) => {
  * }
  */
 router.put("/civilian/involvedperson", async (req, res) => {
+    if (!req.body.name || !req.body.location) { // FIXME error checking for type of involved person
+        res.status(400).send("Missing parameters");
+    }
+
+    return appService.addInvolvedPerson(req.body)
+        .then((res) => {
+            return res.status(200).json(res);
+        })
+        .catch((err) => {
+            return res.status(400).send(err.message);
+        })
+
 
 });
 

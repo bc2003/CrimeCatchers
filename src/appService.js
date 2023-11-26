@@ -123,71 +123,27 @@ const incidentData = {
 }
 
 
-  async function updateIncident(incidentID, newDescription, date) {
-    const updateData = {
-      incidentID,
-      date,
-      newDescription,
-      Status: 'Cancelled' // Status is hardcoded as "Cancelled"
-    };
+/**
+ * Get information about a reporter.
+ * @param {String} email email of the reporter to look up
+ * @returns {Object} reporterInfo
+ * @returns {String} reporterInfo.name the name of the reporter
+ * @returns {String} reporterInfo.address the address of the reporter
+ * @returns {String} reporterInfo.phoneNumber the phone number of the reporter
+ */
+async function getReporter(email) {
+    let reporterInfo;
 
-    try {
-      const response = await fetch('/incident-update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData)
-      });
-
-      if (response.ok) {
-        console.log('Incident updated successfully.');
-      } else {
-        console.error('Failed to update the incident. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error updating the incident:', error);
-    }
-  }
-
-  async function deleteIncident(incidentID) {
-    try {
-      const response = await fetch(`/incident?incidentID=${encodeURIComponent(incidentID)}`, {
-        method: 'DELETE',
-        // Include headers if necessary, like authorization
-      });
-
-      if (response.ok) {
-        console.log('Incident deleted successfully.');
-      } else {
-        console.error('Failed to delete the incident. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error deleting the incident:', error);
-    }
-  }
-
-  async function getReporterDetails(email) {
-    try {
-      const response = await fetch(`/reporter?email=${encodeURIComponent(email)}`, {
-        method: 'GET',
-        // Include headers if necessary
-      });
-
-      if (response.ok) {
-        const reporterDetails = await response.json();
-        console.log('Reporter details:', reporterDetails);
-        return reporterDetails;
-      } else if (response.status === 404) {
-        console.error('Reporter not found.');
-      } else {
-        console.error('Failed to get reporter details. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error getting reporter details:', error);
-    }
-  }
-
+    return withOracleDB((connection) => {
+        return connection.execute("SELECT * FROM Reporter WHERE email=:email",
+            [email], { autoCommit: true } )
+            .then((result) => {
+                reporterInfo.name = result.rows[0].NAME;
+                reporterInfo.address = result.rows[0].ADDRESS;
+                reporterInfo.phoneNumber = result.rows[0].PHONENUMBER;
+            });
+    });
+}
 
   async function updateReporterDetails(name, address, phoneNumber, email) {
     const reporterData = {
@@ -370,14 +326,26 @@ async function createIncident(incidentInfo) {
         for (let involved of incidentInfo.involved) {
             // TODO: add involved persons with the right type
         }
-        await connection.execute(`INSERT INTO IncidentStatus VALUES ('${incidentInfo.description}', '${incidentInfo.status}')`, [], { autoCommit: true });
-        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`;
+
+        // Note: these are protected from injection when using bound variables
+        await connection.execute(`INSERT INTO IncidentStatus VALUES (:incident_description, :incident_status)`, [incidentInfo.description, incidentInfo.status], { autoCommit: true });
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`; // TODO bindings
         await connection.execute(queryInfo, [], { autoCommit: true });
         await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`);
         return {
             incidentID: generatedIncidentID
         };
     });
+}
+
+async function updateIncident(incidentInfo) {
+    await connection.execute(`UPDATE IncidentInfo SET date = TO_DATE(:date, "yyyy-MM-dd"), description = newDescription`);
+}
+
+async function addInvolvedPerson(involvedInfo) {
+    return {
+        personID: -1
+    };
 }
 
 /**
@@ -436,5 +404,8 @@ module.exports = {
     countDemotable,
     createIncident,
     recreateAllTables,
-    createReporter
+    createReporter,
+    getReporter,
+    updateIncident,
+    addInvolvedPerson
 };

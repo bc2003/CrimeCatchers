@@ -79,14 +79,13 @@ describe("CivilianRequests", function() {
     });
 
    it("should be able to send a basic request for making an incident", function() {
-        let dateIncident = new Date("10 October 2023");
-        console.log(dateIncident.toISOString());
+        let dateIncident = "2023-10-10";
         return chai.request(SERVER)
            .post("/civilian/incident")
            .send({
                email: "munce@student.ubc.ca",
                description: "Bike theft",
-               date: dateIncident.toISOString(),
+               date: dateIncident,
                involved: []
            }).then((res) => {
                console.log(res.text);
