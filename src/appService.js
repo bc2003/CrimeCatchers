@@ -145,6 +145,15 @@ async function getReporter(email) {
     });
 }
 
+/**
+ * Get incidents, filtering by the filter info.
+ * @param filterInfo
+ * @returns {Promise<void>}
+ */
+async function getIncidents(filterInfo) {
+
+}
+
   async function updateReporterDetails(name, address, phoneNumber, email) {
     const reporterData = {
       Name: name,
@@ -325,6 +334,7 @@ async function createIncident(incidentInfo) {
             });
         for (let involved of incidentInfo.involved) {
             // TODO: add involved persons with the right type
+            await addInvolvedPerson(involved);
         }
 
         // Note: these are protected from injection when using bound variables
@@ -339,13 +349,87 @@ async function createIncident(incidentInfo) {
 }
 
 async function updateIncident(incidentInfo) {
-    await connection.execute(`UPDATE IncidentInfo SET date = TO_DATE(:date, "yyyy-MM-dd"), description = newDescription`);
+    return withOracleDB((connection) => {
+        // TODO use incidentInfo
+        return connection.execute(`UPDATE IncidentInfo SET date = TO_DATE(:date, "yyyy-MM-dd"), description = newDescription`);
+    });
 }
 
+/**
+ * Add a location
+ * @param {String} location the address
+ * @param {String} neighbourhood the nehighbourhood that this address is located at
+ * @returns {Promise<void>}
+ */
+async function addLocation(location, neighbourhood) {
+    return withOracleDB(((connection) => {
+        return connection.execute(`INSERT INTO Location VALUES (:location, :neighbourhood)`,
+            [location, neighbourhood], { autoCommit: true });
+    }));
+}
+
+/**
+ * Add an involved person
+ * @param {Object} involvedInfo   The info for the involved person
+ * @param {String} involvedInfo.name Name of the involved person
+ * @param {String} involvedInfo.location Location of the involved person
+ * then ONE OF THE FOLLOWING:
+ * physicalBuild: string, numPriorOffenses: number
+ * OR
+ * injuries: string
+ * OR
+ * phoneNumber: string
+ *
+ * @returns {Promise<{personID: number}>} generated personID for the new involved person
+ */
 async function addInvolvedPerson(involvedInfo) {
-    return {
-        personID: -1
-    };
+    // make sure that a specific kind of involved person is specified
+    if (involvedInfo.physicalBuild && involvedInfo.numPriorOffenses && (involvedInfo.injuries || involvedInfo.phoneNumber)) {
+        throw new Error("Not a valid suspect");
+    }
+    if (involvedInfo.injuries && (involvedInfo.physicalBuild || involvedInfo.numPriorOffenses || involvedInfo.phoneNumber)) {
+        throw new Error("Not a valid victim");
+    }
+    if (involvedInfo.phoneNumber && (involvedInfo.physicalBuild || involvedInfo.numPriorOffenses || involvedInfo.injuries)) {
+        throw new Error("Not a valid bystander");
+    }
+
+    try {
+        await addLocation(involvedInfo.location, involvedInfo.neighbourhood);
+    } catch (err) {
+        if (err.message.includes("unique constraint")) {
+            // this is ok
+            console.log("Location already exists, ok");
+        } else {
+            throw new Error(err);
+        }
+    }
+
+    return withOracleDB(async (connection) => {
+        const personID = await connection.execute(`SELECT personID.nextval from dual`,
+            [],
+            { outFormat: oracledb.OUT_FORMAT_OBJECT })
+            .then((result) => {
+                return result.rows[0].NEXTVAL
+            });
+        await connection.execute(`INSERT INTO InvolvedPerson VALUES (:name, :personID, :presentAtAddress)`,
+            [involvedInfo.name, personID, involvedInfo.location], { autoCommit: true });
+
+        if (involvedInfo.physicalBuild) {
+            await connection.execute(`INSERT INTO Suspect
+                                      VALUES (:personID, :physicalBuild, :numPriorOffenses)`,
+                [personID, involvedInfo.physicalBuild, involvedInfo.numPriorOffenses], {autoCommit: true});
+        } else if (involvedInfo.injuries) {
+            await connection.execute(`INSERT INTO Victim VALUES (:personID, :injuries)`,
+                [personID, involvedInfo.injuries]);
+        } else if (involvedInfo.phoneNumber) {
+            await connection.execute(`INSERT INTO Bystander VALUES (:personID, :phoneNumber)`,
+                [personID, involvedInfo.phoneNumber], { autoCommit: true });
+        }
+        return {
+            personID: personID
+        };
+    });
 }
 
 /**

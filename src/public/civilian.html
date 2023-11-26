@@ -102,25 +102,28 @@
 <div id="updateResultMsg"></div>
 
 
-<!-- Update Reporter Deails-->
-<h2>Involved Person Page: </h2>
+<!-- An an involved person-->
+<h2>Add an Involved Witness: </h2>
 <form id="InvolvedPerson">
     <label for="involvedName">Name:</label>
     <input type="text" id="involvedName" name="name" required> <br><br>
 
     <label for="involvedLocation">Location:</label>
-    <input type="text" id="updateAddress" name="address" required> <br><br>
+    <input type="text" id="involvedLocation" name="address" required> <br><br>
 
-    <label for="updatePhoneNumber">Phone Number:</label>
-    <input type="tel" id="updatePhoneNumber" name="phoneNumber" required> <br><br>
+    <label for="involvedNeighbourhood">Neighbourhood:</label>
+    <input type="text" id="involvedNeighbourhood" required><br /> <br />
 
-    <label for="updateEmail">Email:</label>
-    <input type="email" id="updateEmail" name="email" required> <br><br>
+    <label for="involvedPhoneNumber">Phone Number:</label>
+    <input type="tel" id="involvedPhoneNumber" name="phoneNumber" required> <br><br>
+
+    <label for="involvedIncidentID">Add to an associated Incident</label>
+    <input type="text" id="involvedIncidentID" name="incidentID"><br /> <br/>
 
     <button type="submit">Submit</button>
 </form>
 
-<div id="updateResultMsg"></div>
+<div id="involvedPersonResult"></div>
 
 <script src="scripts.js"></script>
 </body>

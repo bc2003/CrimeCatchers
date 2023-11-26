@@ -224,14 +224,13 @@ router.put("/civilian/incident-update", async (req, res) => {
  * Expected request:
  * {
  *     name: string,
- *     location: string
- *     // ONE OF THE FOLLOWING:
- *     physicalBuild: string, numPriorOffenses: number
- *     OR
- *     injuries: string
- *     OR
+ *     location: string,
+ *     neighbourhood: string,
  *     phoneNumber: string
+ *     incidentID: number OPTIONAL
  * }
+ *
+ * Note: civilians can only add witnesses with their phone numbers
  * 
  * Successful response:
  * {
@@ -239,19 +238,33 @@ router.put("/civilian/incident-update", async (req, res) => {
  * }
  */
 router.put("/civilian/involvedperson", async (req, res) => {
-    if (!req.body.name || !req.body.location) { // FIXME error checking for type of involved person
+    if (!req.body.name || !req.body.location || !req.body.neighbourhood || !req.body.phoneNumber) {
         res.status(400).send("Missing parameters");
     }
 
     return appService.addInvolvedPerson(req.body)
-        .then((res) => {
-            return res.status(200).json(res);
+        .then((result) => {
+            return res.status(200).json(result);
         })
         .catch((err) => {
             return res.status(400).send(err.message);
-        })
+        });
 
 
+});
+
+router.get("/civilian/incidents", async (req, res) => {
+   if (!req.body.email) {
+       res.status(400).send("Missing parameters");
+   }
+
+   return appService.getIncidents(req.body)
+       .then((res) => {
+           return res.status(200).json(res);
+       })
+       .catch((err) => {
+           return res.status(400).send(err.message);
+       });
 });
 
 

@@ -253,7 +253,45 @@ async function getReporter(event) {
 }
 
 
+async function addInvolvedWitness(event) {
+    event.preventDefault();
+    const name = document.getElementById("involvedName").value;
+    const address = document.getElementById("involvedLocation").value;
+    const neighbourhood = document.getElementById("involvedNeighbourhood").value;
+    const phoneNumber = document.getElementById("involvedPhoneNumber").value;
+    const incidentID = document.getElementById("involvedIncidentID").value;
 
+    let input = {
+        name: name,
+        location: address,
+        neighbourhood: neighbourhood,
+        phoneNumber: phoneNumber
+    };
+
+    if (incidentID) {
+        input.incidentID = incidentID
+    };
+
+    const response = await fetch("/civilian/involvedperson", {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(input)
+    });
+
+    const responseStatus = response.status;
+    const responseData = await response.json();
+
+    const messageElement = document.getElementById("involvedPersonResult");
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Successfully added a involved witness with ID ${responseData.personID}`;
+    } else {
+        const text = await response.text();
+        messageElement.textContent = `There was an error - ${text}`;
+    }
+}
 
 
 
@@ -304,22 +342,24 @@ async function countDemotable() {
 }
 
 
+
+
 // ---------------------------------------------------------------
 // Initializes the webpage functionalities.
 // Add or remove event listeners based on the desired functionalities.
 window.onload = function() {
     checkDbConnection();
     fetchTableData();
-    document.getElementById("addReporter").addEventListener("submit", addReporter);
-    document.getElementById("updateIncident").addEventListener("submit", updateIncident);
-    document.getElementById("addIncident").addEventListener("submit", addIncident);
-    document.getElementById("resetDemotable").addEventListener("click", resetDemotable);
-    document.getElementById("insertDemotable").addEventListener("submit", insertDemotable);
-    document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable);
-    document.getElementById("countDemotable").addEventListener("click", countDemotable);
-    document.getElementById("deleteIncident").addEventListener("submit", deleteIncident);
-    document.getElementById("getReporterDetailsForm").addEventListener("submit", getReporter);
-
+    document.getElementById("InvolvedPerson").addEventListener("submit", addInvolvedWitness, true);
+    document.getElementById("addReporter").addEventListener("submit", addReporter, true);
+    document.getElementById("updateIncident").addEventListener("submit", updateIncident, true);
+    document.getElementById("addIncident").addEventListener("submit", addIncident,true);
+    document.getElementById("resetDemotable").addEventListener("click", resetDemotable, true);
+    document.getElementById("insertDemotable").addEventListener("submit", insertDemotable, true);
+    document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable, true);
+    document.getElementById("countDemotable").addEventListener("click", countDemotable, true);
+    document.getElementById("deleteIncident").addEventListener("submit", deleteIncident, true);
+    document.getElementById("getReporterDetailsForm").addEventListener("submit", getReporter, true);
 
 
 };
