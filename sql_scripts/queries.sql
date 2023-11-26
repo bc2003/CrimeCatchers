@@ -45,14 +45,28 @@ FROM IncidentInfo info, IncidentStatus stat
 WHERE info.dateIncident > TO_DATE(:date, 'DD-MON-YYYY') AND info.description = stat.description
 -- NOTE: NEED TO ACTUALLY GET USER INPUTTED DATE TO FILTER OUT INCIDENTS THAT HAVE OCCURRED SINCE USER-INPUTTED DATE
 
--- AGGREGATION w/ GROUP BY QUERY -> (action)
+-- AGGREGATION w/ GROUP BY QUERY -> Count the number of incidents in each neighbourhood
 -- Query Implementation Reference: (file + directory + line)
+SELECT L.neighbourhood, COUNT(*) AS Total
+FROM OccurredAt OA, Location L
+WHERE OA.address = L.address
+GROUP BY L.neighbourhood
 
--- AGGREGATION w/ HAVING QUERY -> (action)
+-- AGGREGATION w/ HAVING QUERY -> Return the total weight of equipment owned by each department with an inventory > 1
 -- Query Implementation Reference: (file + directory + line)
+SELECT item.belongsToBranchID, SUM(info.weight) AS EquipmentWeight
+FROM EquipmentInfo info, EquipmentItem item
+WHERE info.type = item.type
+GROUP BY item.belongsToBranchID
+HAVING COUNT(*) > 1
 
 -- NESTED AGGREGATION w/ GROUP BY QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
+SELECT
+FROM
+WHERE
+GROUP BY
+HAVING 
 
 -- DIVISION QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
