@@ -62,6 +62,35 @@ async function fetchAndDisplayUsers() {
     });
 }
 
+async function fetchIncidentData(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("civilianEmail").value;
+
+    const tableElement = document.getElementById('myIncidents');
+    const tableBody = tableElement.querySelector('tbody');
+
+    const response = await fetch(`/civilian/incidents/${email}`, {
+        method: 'GET'
+    });
+
+    const responseData = await response.json();
+    console.log(JSON.stringify(responseData));
+
+    // Always clear old, already fetched data before new fetching process.
+    if (tableBody) {
+        tableBody.innerHTML = '';
+    }
+
+    responseData.forEach(user => {
+        const row = tableBody.insertRow();
+        user.forEach((field, index) => {
+            const cell = row.insertCell(index);
+            cell.textContent = field;
+        });
+    });
+}
+
 // This function resets or initializes the demotable.
 async function resetDemotable() {
     const response = await fetch("/initiate-demotable", {
@@ -350,6 +379,7 @@ async function countDemotable() {
 window.onload = function() {
     checkDbConnection();
     fetchTableData();
+    document.getElementById("showIncidents").addEventListener("submit", fetchIncidentData, true);
     document.getElementById("InvolvedPerson").addEventListener("submit", addInvolvedWitness, true);
     document.getElementById("addReporter").addEventListener("submit", addReporter, true);
     document.getElementById("updateIncident").addEventListener("submit", updateIncident, true);

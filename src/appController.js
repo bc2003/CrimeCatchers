@@ -179,7 +179,6 @@ router.get("/civilian/reporter", async (req, res) => {
  * Successful response will have status 200
  */
 router.put("/civilian/reporter", (req, res) => {
-    // TODO
     if (!req.body.email | !req.body.name | !req.body.address | !req.body.phoneNumber) {
         return res.status(400).send("Missing parameters");
     }
@@ -253,16 +252,16 @@ router.put("/civilian/involvedperson", async (req, res) => {
 
 });
 
-router.get("/civilian/incidents", async (req, res) => {
-   if (!req.body.email) {
-       res.status(400).send("Missing parameters");
-   }
-
-   return appService.getIncidents(req.body)
-       .then((res) => {
-           return res.status(200).json(res);
+router.get("/civilian/incidents/:email", async (req, res) => {
+    return appService.getIncidents({
+        email: req.params.email
+    })
+       .then((result) => {
+           console.log("returning success");
+           return res.status(200).json(result);
        })
        .catch((err) => {
+           console.log("returning failure");
            return res.status(400).send(err.message);
        });
 });

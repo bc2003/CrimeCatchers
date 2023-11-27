@@ -94,34 +94,6 @@ const incidentData = {
     ]
   };
 
-  // Function to make the POST request to the server
-  async function reportIncident(incidentData) {
-
-    const url = 'http://localhost:65535/civilian/incident'; // Replace with your actual domain and port
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add other headers like authorization if required
-            },
-            body: JSON.stringify(incidentData) // Convert the incident data to a JSON string
-        });
-
-        if (response.ok) {
-            const responseData = await response.json();
-            console.log('Incident reported successfully. Incident ID:', responseData.incidentID);
-            return responseData; // Contains the incidentID
-        } else {
-            console.error('Failed to report the incident. Status:', response.status);
-            return null;
-        }
-    } catch (error) {
-        console.error('Error reporting the incident:', error);
-        return null;
-    }
-}
-
 
 /**
  * Get information about a reporter.
@@ -141,17 +113,29 @@ async function getReporter(email) {
                 reporterInfo.name = result.rows[0].NAME;
                 reporterInfo.address = result.rows[0].ADDRESS;
                 reporterInfo.phoneNumber = result.rows[0].PHONENUMBER;
+                return reporterInfo;
             });
     });
 }
 
 /**
  * Get incidents, filtering by the filter info.
- * @param filterInfo
+ * @param filterInfo - filter all incidents by keys in here (all optional)
+ * @param filterInfo.email - filter all incidents for those whose reporter email matches
  * @returns {Promise<void>}
  */
 async function getIncidents(filterInfo) {
-
+    return withOracleDB((connection) => {
+        return connection.execute(`SELECT i.incidentID, i.description, i.dateIncident, s.statusValue
+            FROM IncidentInfo i, IncidentStatus s, ReportedBy b
+            WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email`,
+            [filterInfo.email], {autoCommit: true})
+            .then((result) => {
+                console.log("returning rows");
+                console.log(JSON.stringify(result.rows));
+                return result.rows;
+            });
+    });
 }
 
   async function updateReporterDetails(name, address, phoneNumber, email) {
@@ -182,31 +166,6 @@ async function getIncidents(filterInfo) {
     }
   }
 
-
-  async function getIncidents(sort_by, status, display) {
-    const queryParams = new URLSearchParams({
-      sort_by,
-      status,
-      display: display.join(',') // Convert array to comma-separated string
-    });
-
-    try {
-      const response = await fetch(`/municipal/incident?${queryParams}`, {
-        method: 'GET',
-        // Include headers if necessary, such as authorization tokens
-      });
-
-      if (response.ok) {
-        const incidents = await response.json();
-        console.log('Incidents retrieved:', incidents);
-        return incidents;
-      } else {
-        console.error('Failed to retrieve incidents. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error retrieving incidents:', error);
-    }
-  }
 
   async function getEquipmentDetails(incidentID, sort_by, display) {
     const queryParams = new URLSearchParams({
@@ -333,7 +292,6 @@ async function createIncident(incidentInfo) {
                 return result.rows[0].NEXTVAL
             });
         for (let involved of incidentInfo.involved) {
-            // TODO: add involved persons with the right type
             await addInvolvedPerson(involved);
         }
 
@@ -341,7 +299,7 @@ async function createIncident(incidentInfo) {
         await connection.execute(`INSERT INTO IncidentStatus VALUES (:incident_description, :incident_status)`, [incidentInfo.description, incidentInfo.status], { autoCommit: true });
         let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`; // TODO bindings
         await connection.execute(queryInfo, [], { autoCommit: true });
-        await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`);
+        await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`, [], { autoCommit: true });
         return {
             incidentID: generatedIncidentID
         };
@@ -491,5 +449,6 @@ module.exports = {
     createReporter,
     getReporter,
     updateIncident,
-    addInvolvedPerson
+    addInvolvedPerson,
+    getIncidents
 };
