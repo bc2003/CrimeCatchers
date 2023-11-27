@@ -1,16 +1,17 @@
--- INSERT QUERY -> Insert a new tuple in Department, also triggers new tuple in Location (due to foreign key)
+-- INSERT QUERY -> Insert a new tuple in InvolvedPerson, also triggers new tuple in Location (due to foreign key)
 -- Query Implementation Reference: (file + directory + line)
-INSERT INTO Department (
-    branchID,
-    specialty,
-    locatedAtAddress
+
+INSERT INTO InvolvedPerson (
+    name,
+    personID,
+    presentAtAddress
 ) VALUES (
-    :branchID,
-    :specialty,
-    :locatedAtAddress
+    :name,
+    :personID,
+    :presentAtAddress
 );
 
--- DELETE QUERY -> Delete a tuple from IncidentStatus (triggers ON DELETE CASCADE for IncidentInfo)
+-- DELETE QUERY -> Delete a tuple from IncidentStatus (triggers ON DELETE SET NULL for IncidentInfo)
 -- Query Implementation Reference: (file + directory + line)
 DELETE FROM IncidentStatus I
 WHERE I.description = :description;
@@ -37,20 +38,21 @@ WHERE dateIncident > TO_DATE(:date, 'DD-MON-YYYY');
 
 -- PROJECTION QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
+SELECT :col1, :col2, :col3
+FROM :tableName;
 
 -- JOIN QUERY -> Join on IncidentInfo and IncidentStatus so we can see the current status of incidents after a certain date
 -- Query Implementation Reference: (file + directory + line)
 SELECT *
 FROM IncidentInfo info, IncidentStatus stat
-WHERE info.dateIncident > TO_DATE(:date, 'DD-MON-YYYY') AND info.description = stat.description
--- NOTE: NEED TO ACTUALLY GET USER INPUTTED DATE TO FILTER OUT INCIDENTS THAT HAVE OCCURRED SINCE USER-INPUTTED DATE
+WHERE info.dateIncident > TO_DATE(:date, 'DD-MON-YYYY') AND info.description = stat.description;
 
 -- AGGREGATION w/ GROUP BY QUERY -> Count the number of incidents in each neighbourhood
 -- Query Implementation Reference: (file + directory + line)
-SELECT L.neighbourhood, COUNT(*) AS Total
+SELECT L.neighbourhood, COUNT(*) AS TotalIncidents
 FROM OccurredAt OA, Location L
 WHERE OA.address = L.address
-GROUP BY L.neighbourhood
+GROUP BY L.neighbourhood;
 
 -- AGGREGATION w/ HAVING QUERY -> Return the total weight of equipment owned by each department with an inventory > 1
 -- Query Implementation Reference: (file + directory + line)
@@ -58,15 +60,19 @@ SELECT item.belongsToBranchID, SUM(info.weight) AS EquipmentWeight
 FROM EquipmentInfo info, EquipmentItem item
 WHERE info.type = item.type
 GROUP BY item.belongsToBranchID
-HAVING COUNT(*) > 1
+HAVING COUNT(*) > 1;
 
--- NESTED AGGREGATION w/ GROUP BY QUERY -> (action)
+-- NESTED AGGREGATION w/ GROUP BY QUERY -> Return the neighbourhoods with more police stations than fire stations
 -- Query Implementation Reference: (file + directory + line)
-SELECT
-FROM
-WHERE
-GROUP BY
-HAVING 
+SELECT L1.neighbourhood
+FROM Department D1, Location L1
+WHERE D1.locatedAtAddress = L1.address and D1.specialty = 'police'
+GROUP BY L1.neighbourhood
+HAVING COUNT(*) > (
+    SELECT COUNT(*)
+    FROM Department D2, Location L2
+    WHERE D2.locatedAtAddress = L2.address and D2.specialty = 'fire' and L1.neighbourhood = L2.neighbourhood
+);
 
 -- DIVISION QUERY -> (action)
 -- Query Implementation Reference: (file + directory + line)
