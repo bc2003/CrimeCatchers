@@ -74,5 +74,14 @@ HAVING COUNT(*) > (
     WHERE D2.locatedAtAddress = L2.address and D2.specialty = 'fire' and L1.neighbourhood = L2.neighbourhood
 );
 
--- DIVISION QUERY -> (action)
+-- DIVISION QUERY -> Return all the neighbourhoods which had an incident, but does not have any first responder departments
 -- Query Implementation Reference: (file + directory + line)
+SELECT L.neighbourhood
+FROM OccurredAt OA, Location L
+WHERE OA.address = L.address
+GROUP BY L.neighbourhood
+MINUS
+SELECT L.neighbourhood
+FROM Department D, Location L
+WHERE D.locatedAtAddress = L.address
+GROUP BY L.neighbourhood
