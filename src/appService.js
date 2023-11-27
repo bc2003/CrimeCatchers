@@ -131,8 +131,6 @@ async function getIncidents(filterInfo) {
             WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email`,
             [filterInfo.email], {autoCommit: true})
             .then((result) => {
-                console.log("returning rows");
-                console.log(JSON.stringify(result.rows));
                 return result.rows;
             });
     });
@@ -284,7 +282,6 @@ async function createIncident(incidentInfo) {
     }
 
     return await withOracleDB(async (connection) => {
-        // const dateIncident = incidentInfo.date.substring(0, 10);
         const dateIncident = incidentInfo.date;
         const dateFormat = "yyyy-MM-dd";
         let generatedIncidentID = await connection.execute("SELECT incidentid.nextval FROM dual", [], { outFormat: oracledb.OUT_FORMAT_OBJECT })
@@ -309,7 +306,14 @@ async function createIncident(incidentInfo) {
 async function updateIncident(incidentInfo) {
     return withOracleDB((connection) => {
         // TODO use incidentInfo
-        return connection.execute(`UPDATE IncidentInfo SET date = TO_DATE(:date, "yyyy-MM-dd"), description = newDescription`);
+
+        return connection.execute(`UPDATE IncidentInfo
+                                   SET date = TO_DATE(:date, "yyyy-MM-dd"), description = :newDescription
+                                   WHERE `,
+            [incidentInfo.newDescription], { autoCommit: true })
+            .then((ignored) => {
+                connection.execute(`UPDATE IncidentStatus`)
+            });
     });
 }
 
