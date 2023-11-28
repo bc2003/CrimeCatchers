@@ -12,6 +12,8 @@
  * 
  */
 
+let displayedEmailIncidentTable = '';
+
 
 // This function checks the database connection and updates its status on the frontend.
 async function checkDbConnection() {
@@ -62,15 +64,15 @@ async function fetchAndDisplayUsers() {
     });
 }
 
-async function fetchIncidentData(event) {
-    event.preventDefault();
-
-    const email = document.getElementById("civilianEmail").value;
+async function refreshIncidentTable(submittedEmail) {
+    if (submittedEmail !== displayedEmailIncidentTable) {
+        return;
+    }
 
     const tableElement = document.getElementById('myIncidents');
     const tableBody = tableElement.querySelector('tbody');
 
-    const response = await fetch(`/civilian/incidents/${email}`, {
+    const response = await fetch(`/civilian/incidents/${submittedEmail}`, {
         method: 'GET'
     });
 
@@ -89,6 +91,13 @@ async function fetchIncidentData(event) {
             cell.textContent = field;
         });
     });
+}
+
+async function fetchIncidentData(event) {
+    event.preventDefault();
+
+    displayedEmailIncidentTable = document.getElementById("civilianEmail").value;
+    await refreshIncidentTable(displayedEmailIncidentTable);
 }
 
 // This function resets or initializes the demotable.
@@ -165,7 +174,9 @@ async function addIncident(event) {
     const messageElement = document.getElementById('addIncidentResponse');
 
     if (responseStatus === 200) {
-        messageElement.textContent = `Added incident successfully with ID ${responseData.incidentID}`;
+        refreshIncidentTable(emailValue).finally(() => {
+            messageElement.textContent = `Added incident successfully with ID ${responseData.incidentID}`;
+        });
     } else {
         messageElement.textContent = `There was an error`;
     }
@@ -186,7 +197,7 @@ async function updateIncident(event) {
         },
         body: JSON.stringify({
             date: date,
-            description: new_desc,
+            newDescription: new_desc,
             status: status,
             incidentID: incidentID
         })
@@ -194,10 +205,13 @@ async function updateIncident(event) {
 
     const responseStatus = await response.status;
     const responseData = await response.json();
+    console.log(`got response data ${JSON.stringify(responseData)}`);
     const messageElement = document.getElementById('updateIncidentResponse');
 
     if (responseStatus === 200) {
-        messageElement.textContent = `Updated incident successfully with ID`;
+        refreshIncidentTable(responseData.email).finally(() => {
+            messageElement.textContent = `Updated incident successfully`;
+        });
     } else {
         messageElement.textContent = `There was an error`;
     }
