@@ -1,4 +1,4 @@
--- Clear Database Statement
+-- Statement for Clearing Database
 -- Source: https://stackoverflow.com/questions/31890032/how-to-delete-all-data-in-oracle-database-with-sql
 BEGIN
     FOR cur_rec IN (SELECT object_name, object_type
@@ -252,6 +252,22 @@ INSERT INTO Location(address, neighbourhood)
 VALUES ('1475 W 10th Ave.', 'Fairview');
 INSERT INTO Location(address, neighbourhood)
 VALUES ('5425 Carnarvon St.', 'Kerrisdale');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('4830 Nanaimo St.', 'Kensington - Cedar Cottage');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('5402 Victoria Dr.', 'Kensington - Cedar Cottage');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('6070 East Blvd.', 'Kerrisdale');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('899 W 12th Ave.', 'Fairview');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('1005 W 59th Ave.', 'Marpole');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('872 E Hastings St.', 'Strathcona');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('2992 Wesbrook Mall', 'University Endowment Lands');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('3080 Prince Edward St.', 'Mount Pleasant');
 
 -- OccurredAt Table
 INSERT INTO OccurredAt(incidentID, address)
@@ -280,6 +296,22 @@ INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (4, 'fire', '1475 W 10th Ave.');
 INSERT INTO Department(branchID, specialty, locatedAtAddress)
 VALUES (5, 'fire', '5425 Carnarvon St.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (6, 'police', '4830 Nanaimo St.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (7, 'fire', '5402 Victoria Dr.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (8, 'police', '6070 East Blvd.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (9, 'hospital', '899 W 12th Ave.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (10, 'fire', '1005 W 59th Ave.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (11, 'police', '872 E Hastings St.');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (12, 'fire', '2992 Wesbrook Mall');
+INSERT INTO Department(branchID, specialty, locatedAtAddress)
+VALUES (13, 'hospital', '3080 Prince Edward St.');
 
 -- Responder Table
 INSERT INTO Responder(professionalID, name, occupation, worksForBranchID)

@@ -1,6 +1,5 @@
 -- INSERT QUERY -> Insert a new tuple in InvolvedPerson, also triggers new tuple in Location (due to foreign key)
 -- Query Implementation Reference: (file + directory + line)
-
 INSERT INTO InvolvedPerson (
     name,
     personID,
@@ -16,7 +15,7 @@ INSERT INTO InvolvedPerson (
 DELETE FROM IncidentStatus I
 WHERE I.description = :description;
 
--- UPDATE QUERY -> Update an Incident (IncidentInfo) with a new date
+-- UPDATE QUERY -> Update an Incident (IncidentInfo relation) with a new date
 -- Query Implementation Reference: (file + directory + line)
 UPDATE IncidentInfo
 SET dateIncident = :date
