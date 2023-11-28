@@ -468,6 +468,22 @@ INSERT INTO EquipmentInfo(type, weight, color)
 VALUES ('laptop', 1, 'black');
 INSERT INTO EquipmentInfo(type, weight, color)
 VALUES ('gauze', 1, 'white');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('Glock 19 (Handgun)', 3, 'black');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('Smith & Wesson M&P (Handgun)', 4, 'black');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('stretcher', 75, 'white');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('flashlight', 2, 'red');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('alcohol meter', 8, 'grey');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('axe', 5, 'brown');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('ladder', 110, 'silver');
+INSERT INTO EquipmentInfo(type, weight, color)
+VALUES ('taser', 5, 'black');
 
 -- EquipmentItem Table
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
@@ -480,6 +496,22 @@ INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
 VALUES (1237, 4, 'laptop');
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
 VALUES (1238, 2, 'gauze');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1239, 6, 'Glock 19 (Handgun)');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1240, 11, 'Smith & Wesson M&P (Handgun)');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1241, 9, 'stretcher');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1242, 11, 'flashlight');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1244, 8, 'alcohol meter');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1245, 10, 'axe');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1246, 10, 'ladder');
+INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
+VALUES (1247, 8, 'taser');
 
 -- VehicleSpecs Table
 INSERT INTO VehicleSpecs(model, numSeats)
