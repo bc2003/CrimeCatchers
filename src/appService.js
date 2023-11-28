@@ -304,15 +304,41 @@ async function createIncident(incidentInfo) {
 }
 
 async function updateIncident(incidentInfo) {
-    return withOracleDB((connection) => {
-        // TODO use incidentInfo
+    console.log(`got incidentinfo ${incidentInfo}`);
+    return withOracleDB(async (connection) => {
+        const oldInfo = await connection.execute(`SELECT r.email, i.description
+                                                         FROM Reporter r, ReportedBy rb, IncidentInfo i
+                                                         WHERE r.email = rb.email AND rb.incidentID = i.incidentID AND i.incidentID = :id`,
+            [incidentInfo.incidentID], {outFormat: oracledb.OUT_FORMAT_OBJECT})
+            .then((result) => {
+                return result.rows[0];
+            });
+
+        console.log(`oldInfo is ${JSON.stringify(oldInfo)}`);
+
+
+        await connection.execute(`DELETE
+                                  FROM IncidentStatus
+                                  WHERE description = :oldDescription`,
+            [oldInfo["DESCRIPTION"]], {autoCommit: true});
+
+        console.log("got description");
+
+        await connection.execute(`INSERT INTO IncidentStatus
+                                  VALUES (:newDescription, :newStatus)`,
+            [incidentInfo.newDescription, incidentInfo.status], {autoCommit: true});
+
+        console.log("inserted new incidentstatus");
 
         return connection.execute(`UPDATE IncidentInfo
-                                   SET date = TO_DATE(:date, "yyyy-MM-dd"), description = :newDescription
-                                   WHERE `,
-            [incidentInfo.newDescription], { autoCommit: true })
-            .then((ignored) => {
-                connection.execute(`UPDATE IncidentStatus`)
+                                   SET dateIncident = TO_DATE(:ndate, 'yyyy-MM-dd'),
+                                       description = :newDescription
+                                   WHERE incidentID = :incidentID`,
+            [incidentInfo.date, incidentInfo.newDescription, incidentInfo.incidentID], {autoCommit: true})
+            .then(() => {
+                return {
+                    email: oldInfo['EMAIL']
+                }
             });
     });
 }

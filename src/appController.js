@@ -205,14 +205,15 @@ router.put("/civilian/reporter", (req, res) => {
  */
 router.put("/civilian/incident-update", async (req, res) => {
     if (!req.body.incidentID || !req.body.date || !req.body.newDescription || !req.body.status) {
-        req.status(500).json({
+        console.log("Could not fulfill /civilian/incidnet-update due to missing params")
+        res.status(400).json({
             body: "Missing parameters"
         });
     }
 
     return appService.updateIncident(req.body)
-        .then(() => {
-            return res.status(200).send("Successful");
+        .then((data) => {
+            return res.status(200).json(data);
         })
         .catch((err) => {
             return res.status(400).send(err.message);
