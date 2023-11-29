@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Police Page</title>
+</head>
+<body>
+
+<h2>Get the Incidencets</h2>
+
+<form id="getIncidents">
+    <label for="IncidentID">Input an Incident: </label><br>
+    <input type="IncidentID" id="IncidentID" name="IncidentID" required><br>
+
+    <label for="sort_by">sort_by</label><br>
+    <textarea id="sort_by" name="sort_by" required></textarea><br>
+
+    <label for="status">Status:</label><br>
+    <input type="text" id="status_add" name="status" value="created" readonly><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<table id="Displays">
+    <thead>
+    <tr>
+        <th>incidentID</th>
+        <th>statusValue</th>
+        <th>dateIncident</th>
+        <th>description</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div id="getIncidents"></div>
+
+<h2>Get the equipments</h2>
+
+<form id="getEquipment">
+    <label for="IncidentID">Input an Incident: </label><br>
+    <input type="IncidentID" id="IncidentID" name="IncidentID" required><br>
+
+    <label for="sort_by">sort_by</label><br>
+    <textarea id="sort_by" name="sort_by" required></textarea><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<table id="Equipments">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>type</th>
+        <th>weight</th>
+        <th>color</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+<div id="getEquipment"></div>
+
+<h2>Delete</h2>
+<form id="delete_prof">
+    <label for="delete_prof">Professional ID:</label>
+    <input type="text" id="delete_ID" name="professionalID" required> <br><br>
+    <button type="submit">Submit</button>
+</form>
+
+<div id="deleted_professional_id"></div>
+
+<h1>The Reporter</h1>
+<form id="addProfessionalReporter">
+    <label for="reporterID">Professional ID</label>
+    <input type="email" id="reporterID" name="reporterID" required> <br><br>
+    <label for="departmentNumber">Department</label><br>
+    <input type="text" id="departmentNumber" name="departmentNumber" required><br>
+    <label for="Name"> Responder Name</label>
+    <input type="text" id="Name" name="Name" required> <br><br>
+    <label for="Occupation">Occupation</label>
+    <input type="text" id="Occupation" name="Occupation" required> <br><br>
+    <button type="submit">Submit</button>
+</form>
+
+<div id="addProfessionalReporter"></div>
+
+<script src="scripts.js"></script>
+</body>
+</html>
