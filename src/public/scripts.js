@@ -69,11 +69,11 @@ async function refreshIncidentTable(submittedEmail) {
     });
 }
 
-async function fetchIncidentData(event) {
+function fetchIncidentData(event) {
     event.preventDefault();
 
     displayedEmailIncidentTable = document.getElementById("civilianEmail").value;
-    await refreshIncidentTable(displayedEmailIncidentTable);
+    return refreshIncidentTable(displayedEmailIncidentTable);
 }
 
 
@@ -443,7 +443,6 @@ async function ViewOutStanding(event) {
 // Add or remove event listeners based on the desired functionalities.
 window.onload = function() {
     checkDbConnection();
-    fetchTableData();
     document.getElementById("showIncidents").addEventListener("submit", fetchIncidentData, true);
     document.getElementById("InvolvedPerson").addEventListener("submit", addInvolvedWitness, true);
     document.getElementById("addReporter").addEventListener("submit", addReporter, true);
@@ -461,9 +460,3 @@ window.onload = function() {
     document.getElementById("NoFireStations").addEventListener("click", ViewOutStanding, true);
 
 };
-
-// General function to refresh the displayed table data. 
-// You can invoke this after any table-modifying operation to keep consistency.
-function fetchTableData() {
-    fetchAndDisplayUsers();
-}

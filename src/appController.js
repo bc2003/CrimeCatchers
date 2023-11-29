@@ -280,6 +280,8 @@ router.get("/civilian/incidents/:email", async (req, res) => {
  *     sort_by: "ascend" | "descend", OPTIONAL
  *     status: "Cancelled" | "Open" | "In progress", OPTIONAL
  *     display: string[] (could include "incidentID", "statusValue", "dateIncident", or "description") OPTIONAL
+ *     dateGreater: string (of the form yyyy-MM-dd) OPTIONAL
+ *     dateLesser: string (of the form yyyy-MM-dd) OPTIONAL
  * }
  *
  * Successful response:
@@ -293,6 +295,7 @@ router.get("/civilian/incidents/:email", async (req, res) => {
  */
 router.get("/municipal/incidents", async (req, res) => {
    // TODO
+    console.log(`query was ${JSON.stringify(req.query)}`);
     return appService.getIncidents(req.query)
         .then((result) => {
             return res.status(200).json(result);

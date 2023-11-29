@@ -122,48 +122,82 @@ async function getReporter(email) {
  * Get incidents, filtering by the filter info.
  * @param filterInfo - filter all incidents by keys in here (all optional)
  * @param filterInfo.email - filter all incidents for those whose reporter email matches
- * @returns {Promise<void>}
+ * @param filterInfo.sort_by - either "ascend" or "descend"
+ * @param filterInfo.sort_col - column to sort by
+ * @param filterInfo.status - filter by this status
+ * @param filterInfo.dateGreater - of the form yyyy-MM-dd, only incidents w/ date greater
+ * @param filterInfo.dateEqual - of the form yyyy-MM-dd, only incidents w/ date equal
+ * @param filterInfo.dateLesser - of the form yyyy-MM-dd, only incidents w/ date lesser
+ * @param filterInfo.display - includes at least one of incidentID, statusValue, dateIncident, description
  */
 async function getIncidents(filterInfo) {
+    const incidentInfoFields = ["description", "incidentID", "dateIncident"];
+
+    let select = "SELECT";
+    let from = " FROM IncidentInfo i, IncidentStatus s, ReportedBy b";
+    let where = " WHERE i.description = s.description AND b.incidentID = i.incidentID";
+    let orderBy = "";
+    let queryBindings = [];
+
+    if (filterInfo.display) {
+        const displayArray = filterInfo.display.split(",");
+        displayArray.forEach((col) => {
+            if (incidentInfoFields.includes(col)) {
+                select += ` i.${col},`;
+            } else {
+                select += ` s.${col},`;
+            }
+        });
+        select = select.substring(0, select.length - 1); // cut off remaining ,
+    } else { // !filterInfo.display
+        select += " i.incidentID, i.description, i.dateIncident, s.statusValue"
+    }
+
+    if (filterInfo.email) {
+        where += " AND b.email = :email";
+        queryBindings += [filterInfo.email];
+    }
+
+    if (filterInfo.status) {
+        where += " AND s.statusValue = :status";
+        queryBindings += [filterInfo.status];
+    }
+
+    if (filterInfo.dateGreater) {
+        where += " AND i.date > TO_DATE(:date1, 'yyyy-MM-dd')";
+        queryBindings += [filterInfo.dateGreater];
+    }
+    if (filterInfo.dateLesser) {
+        where += " AND i.date < TO_DATE(:date2, 'yyyy-MM-dd')";
+        queryBindings += [filterInfo.dateLesser];
+    }
+
+    if (filterInfo.dateEqual) {
+        where += " AND i.date = TO_DATE(:date3, 'yyyy-MM-dd')";
+        queryBindings += [filterInfo.dateEqual];
+    }
+
+    if (filterInfo.sort_col) {
+        orderBy += ` ORDER BY :sortCol`;
+        queryBindings += [filterInfo.sort_col];
+
+        if (filterInfo.sort_by) {
+            orderBy += " :sortBy";
+            queryBindings += [filterInfo.sort_by];
+        }
+    }
+
+
+    const queryString = select + from + where + orderBy;
+    console.log(`queryString was ${queryString}`);
+    console.log(`queryBindings was ${JSON.stringify(queryBindings)}`);
     return withOracleDB((connection) => {
-        return connection.execute(`SELECT i.incidentID, i.description, i.dateIncident, s.statusValue
-            FROM IncidentInfo i, IncidentStatus s, ReportedBy b
-            WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email`,
-            [filterInfo.email], {autoCommit: true})
+        return connection.execute(queryString, queryBindings, {autoCommit: true})
             .then((result) => {
                 return result.rows;
             });
     });
 }
-
-  async function updateReporterDetails(name, address, phoneNumber, email) {
-    const reporterData = {
-      Name: name,
-      Address: address,
-      PhoneNumber: phoneNumber,
-      Email: email
-    };
-
-    try {
-      const response = await fetch('/reporter', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          // Include any other headers like authorization tokens if required
-        },
-        body: JSON.stringify(reporterData)
-      });
-
-      if (response.ok) {
-        console.log('Reporter details updated successfully.');
-      } else {
-        console.error('Failed to update reporter details. Status:', response.status);
-      }
-    } catch (error) {
-      console.error('Error updating reporter details:', error);
-    }
-  }
-
 
   async function getEquipmentDetails(incidentID, sort_by, display) {
     const queryParams = new URLSearchParams({
