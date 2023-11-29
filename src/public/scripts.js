@@ -373,6 +373,67 @@ async function addInvolvedWitness(event) {
 }
 
 
+async function ViewNeighbourHood(event) {
+    event.preventDefault();
+    fetch('/municipal/neighbourhood/incidents')
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+async function ViewEquipmentWeights(event) {
+    event.preventDefault();
+    fetch('/municipal/neighbourhood/weight')
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+async function ViewNeighbourPolice(event) {
+    event.preventDefault();
+    fetch('/municipal/neighbourhood/police')
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+async function ViewOutStanding(event) {
+    event.preventDefault();
+    fetch('/municipal/neighbourhood/outstanding')
+        .then(response => response.json())
+        .then(data => {
+            const resultsContainer = document.getElementById('results');
+            resultsContainer.innerHTML = '';
+            data.forEach(item => {
+                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+            });
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+
+
+
+
+
 
 
 
@@ -394,6 +455,10 @@ window.onload = function() {
     document.getElementById("getEquipment").addEventListener("submit", getEquipment, true);
     document.getElementById("delete_prof").addEventListener("submit", deleteProfessionalID, true);
     document.getElementById("addProfessionalReporter").addEventListener("submit", addProfessionalReporter, true);
+    document.getElementById("NeightbourHoodReports").addEventListener("click", ViewNeighbourHood, true);
+    document.getElementById("EquipmentWeights").addEventListener("click", ViewEquipmentWeights, true);
+    document.getElementById("FireStations").addEventListener("click", ViewNeighbourPolice, true);
+    document.getElementById("NoFireStations").addEventListener("click", ViewOutStanding, true);
 
 };
 
