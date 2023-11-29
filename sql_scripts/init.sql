@@ -210,6 +210,16 @@ INSERT INTO IncidentStatus(description, statusValue)
 VALUES ('arson', 'in-progress');
 INSERT INTO IncidentStatus(description, statusValue) 
 VALUES ('vehicle theft', 'closed');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('possession of illegal substances', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('jaywalking', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('assault', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('DUI', 'in-progress');
+INSERT INTO IncidentStatus(description, statusValue) 
+VALUES ('human trafficking', 'in-progress');
 
 -- IncidentInfo Table
 INSERT INTO IncidentInfo(incidentID, dateIncident, description)
@@ -226,10 +236,20 @@ INSERT INTO IncidentInfo(incidentID, dateIncident, description)
 VALUES (6, TO_DATE('16-NOV-2010', 'DD-MON-YYYY'), 'burglary');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
 VALUES (7, TO_DATE('08-JUN-2023', 'DD-MON-YYYY'), 'murder');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (8, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'possession of illegal substances');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (9, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'jaywalking');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (10, TO_DATE('06-JUL-2020', 'DD-MON-YYYY'), 'assault');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (11, TO_DATE('06-JUL-2021', 'DD-MON-YYYY'), 'DUI');
+INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
+VALUES (12, TO_DATE('24-MAY-2023', 'DD-MON-YYYY'), 'human trafficking');
 
 -- Location Table
 INSERT INTO Location(address, neighbourhood)
-VALUES ('1755 E 55th Ave.', 'Victoria-Fraserview');
+VALUES ('1755 E 55th Ave.', 'Victoria - Fraserview');
 INSERT INTO Location(address, neighbourhood)
 VALUES ('142 Water St.', 'Downtown');
 INSERT INTO Location(address, neighbourhood)
@@ -268,6 +288,16 @@ INSERT INTO Location(address, neighbourhood)
 VALUES ('2992 Wesbrook Mall', 'University Endowment Lands');
 INSERT INTO Location(address, neighbourhood)
 VALUES ('3080 Prince Edward St.', 'Mount Pleasant');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('5832 Olympic St.', 'Dunbar - Southlands');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('2036 Main Mall', 'University Endowment Lands');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('5391 Knight St.', 'Kensington - Cedar Cottage');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('710 Granville St.', 'Downtown');
+INSERT INTO Location(address, neighbourhood)
+VALUES ('8589 Fraser St.', 'Sunset');
 
 -- OccurredAt Table
 INSERT INTO OccurredAt(incidentID, address)
@@ -284,6 +314,16 @@ INSERT INTO OccurredAt(incidentID, address)
 VALUES (6, '1688 W 29th Ave.');
 INSERT INTO OccurredAt(incidentID, address)
 VALUES (7, '712 Lost Lagoon Path');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (8, '5832 Olympic St.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (9, '5391 Knight St.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (10, '2036 Main Mall');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (11, '710 Granville St.');
+INSERT INTO OccurredAt(incidentID, address)
+VALUES (12, '8589 Fraser St.');
 
 -- Department Table
 INSERT INTO Department(branchID, specialty, locatedAtAddress)
@@ -444,6 +484,8 @@ INSERT INTO Reporter(name, address, phoneNumber, email)
 VALUES ('Spider-Man', '101 Web Avenue, Marvel City', '5554444987', 'spider.man@gmail.com');
 INSERT INTO Reporter(name, address, phoneNumber, email)
 VALUES ('Black Widow', '202 Spy Street, Shadowland', '5555555987', 'black.widow@gmail.com');
+INSERT INTO Reporter(name, address, phoneNumber, email)
+VALUES ('Timothy Jimothy Jones', '12271 Mitchell Rd., Richmond', '7789696024', 'tj.jones@gmail.com');
 
 -- ReportedBy Table
 INSERT INTO ReportedBy(incidentID, email, dateReported)
@@ -456,6 +498,16 @@ INSERT INTO ReportedBy(incidentID, email, dateReported)
 VALUES (4, 'spider.man@gmail.com', TO_DATE('09-MAY-2017', 'DD-MON-YYYY'));
 INSERT INTO ReportedBy(incidentID, email, dateReported)
 VALUES (5, 'black.widow@gmail.com', TO_DATE('07-JAN-2010', 'DD-MON-YYYY'));
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (8, 'tj.jones@gmail.com', TO_DATE('20-APR-2008', 'DD-MON-YYYY'));
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (9, 'tj.jones@gmail.com', TO_DATE('20-APR-2008', 'DD-MON-YYYY'));
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (10, 'tj.jones@gmail.com', TO_DATE('06-JUL-2020', 'DD-MON-YYYY'));
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (11, 'tj.jones@gmail.com', TO_DATE('06-JUL-2021', 'DD-MON-YYYY'));
+INSERT INTO ReportedBy(incidentID, email, dateReported)
+VALUES (12, 'tj.jones@gmail.com', TO_DATE('01-JUN-2023', 'DD-MON-YYYY'));
 
 -- EquipmentInfo Table
 INSERT INTO EquipmentInfo(type, weight, color)
@@ -471,7 +523,7 @@ VALUES ('gauze', 1, 'white');
 INSERT INTO EquipmentInfo(type, weight, color)
 VALUES ('Glock 19 (Handgun)', 3, 'black');
 INSERT INTO EquipmentInfo(type, weight, color)
-VALUES ('Smith & Wesson M&P (Handgun)', 4, 'black');
+VALUES ('Smith & Wesson M&P', 4, 'black');
 INSERT INTO EquipmentInfo(type, weight, color)
 VALUES ('stretcher', 75, 'white');
 INSERT INTO EquipmentInfo(type, weight, color)
@@ -499,7 +551,7 @@ VALUES (1238, 2, 'gauze');
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
 VALUES (1239, 6, 'Glock 19 (Handgun)');
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
-VALUES (1240, 11, 'Smith & Wesson M&P (Handgun)');
+VALUES (1240, 11, 'Smith & Wesson M&P');
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)
 VALUES (1241, 9, 'stretcher');
 INSERT INTO EquipmentItem(equipmentID, belongsToBranchID, type)

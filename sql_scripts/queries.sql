@@ -83,4 +83,4 @@ MINUS
 SELECT L.neighbourhood
 FROM Department D, Location L
 WHERE D.locatedAtAddress = L.address
-GROUP BY L.neighbourhood
+GROUP BY L.neighbourhood;
