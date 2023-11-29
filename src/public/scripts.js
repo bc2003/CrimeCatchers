@@ -38,31 +38,7 @@ async function checkDbConnection() {
     });
 }
 
-// Fetches data from the demotable and displays it.
-async function fetchAndDisplayUsers() {
-    const tableElement = document.getElementById('demotable');
-    const tableBody = tableElement.querySelector('tbody');
 
-    const response = await fetch('/demotable', {
-        method: 'GET'
-    });
-
-    const responseData = await response.json();
-    const demotableContent = responseData.data;
-
-    // Always clear old, already fetched data before new fetching process.
-    if (tableBody) {
-        tableBody.innerHTML = '';
-    }
-
-    demotableContent.forEach(user => {
-        const row = tableBody.insertRow();
-        user.forEach((field, index) => {
-            const cell = row.insertCell(index);
-            cell.textContent = field;
-        });
-    });
-}
 
 async function refreshIncidentTable(submittedEmail) {
     if (submittedEmail !== displayedEmailIncidentTable) {
@@ -98,51 +74,6 @@ async function fetchIncidentData(event) {
 
     displayedEmailIncidentTable = document.getElementById("civilianEmail").value;
     await refreshIncidentTable(displayedEmailIncidentTable);
-}
-
-// This function resets or initializes the demotable.
-async function resetDemotable() {
-    const response = await fetch("/initiate-demotable", {
-        method: 'POST'
-    });
-    const responseData = await response.json();
-
-    if (responseData.success) {
-        const messageElement = document.getElementById('resetResultMsg');
-        messageElement.textContent = "demotable initiated successfully!";
-        fetchTableData();
-    } else {
-        alert("Error initiating table!");
-    }
-}
-
-// Inserts new records into the demotable.
-async function insertDemotable(event) {
-    event.preventDefault();
-
-    const idValue = document.getElementById('insertId').value;
-    const nameValue = document.getElementById('insertName').value;
-
-    const response = await fetch('/insert-demotable', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            id: idValue,
-            name: nameValue
-        })
-    });
-
-    const responseData = await response.json();
-    const messageElement = document.getElementById('insertResultMsg');
-
-    if (responseData.success) {
-        messageElement.textContent = "Data inserted successfully!";
-        fetchTableData();
-    } else {
-        messageElement.textContent = "Error inserting data!";
-    }
 }
 
 
@@ -247,11 +178,66 @@ async function addReporter(event) {
     }
 }
 
+async function addProfessionalReporter(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const professionalID = document.getElementById("ProfessionalreporterID").value;
+    const dept = document.getElementById("departmentNumber").value;
+    const name = document.getElementById("ResponderName").value;
+    const occupation = document.getElementById("Occupation").value;
+
+    const response = await fetch('/municipal/responder', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            professionalID: professionalID,
+            dept: dept,
+            name: name,
+            occupation: occupation
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('addProfessionalReporter');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Added the responder`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
 async function deleteIncident(event) {
     event.preventDefault();
     console.log("THIS GETS PRINTED")
     const deleteID = document.getElementById("delete_ID").value;
     const response = await fetch('/civilian/incident', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deleteID: deleteID,
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('deleted_Incident');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `The incident was deleted`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+async function deleteProfessionalID(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const deleteID = document.getElementById("delete_prof").value;
+    const response = await fetch('/municipal/incident', {
         method: 'DELETE',
         headers: {
             'Content-Type': 'application/json'
@@ -294,6 +280,56 @@ async function getReporter(event) {
         messageElement.textContent = `There was an error`;
     }
 }
+
+async function getEquipment(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const email = document.getElementById("IncidentID").value;
+    const response = await fetch('/municipal/equipment', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deleteID: email,
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('getEquipment');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `The equipments are ${responseData.ID}, ${responseData.type},  ${responseData.weight}, ${responseData.color}`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+async function getProfessionalIncidents(event) {
+    event.preventDefault();
+    console.log("THIS GETS PRINTED")
+    const email = document.getElementById("IncidentID").value;
+    const response = await fetch('/municipal/incidents', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            deleteID: email,
+        })
+    });
+
+    const responseStatus = await response.status;
+    const messageElement = document.getElementById('getReporterDetails');
+
+    if (responseStatus === 200) {
+        messageElement.textContent = `Added reporter Details are ${responseData.name}, ${responseData.address},  ${responseData.phoneNumber}`;
+    } else {
+        messageElement.textContent = `There was an error`;
+    }
+}
+
+
 
 
 async function addInvolvedWitness(event) {
@@ -338,52 +374,6 @@ async function addInvolvedWitness(event) {
 
 
 
-// Updates names in the demotable.
-async function updateNameDemotable(event) {
-    event.preventDefault();
-    const oldNameValue = document.getElementById('updateOldName').value;
-    const newNameValue = document.getElementById('updateNewName').value;
-
-    const response = await fetch('/update-name-demotable', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            oldName: oldNameValue,
-            newName: newNameValue
-        })
-    });
-
-    const responseData = await response.json();
-    const messageElement = document.getElementById('updateNameResultMsg');
-
-    if (responseData.success) {
-        messageElement.textContent = "Name updated successfully!";
-        fetchTableData();
-    } else {
-        messageElement.textContent = "Error updating name!";
-    }
-}
-
-// Counts rows in the demotable.
-// Modify the function accordingly if using different aggregate functions or procedures.
-async function countDemotable() {
-    const response = await fetch("/count-demotable", {
-        method: 'GET'
-    });
-
-    const responseData = await response.json();
-    const messageElement = document.getElementById('countResultMsg');
-
-    if (responseData.success) {
-        const tupleCount = responseData.count;
-        messageElement.textContent = `The number of tuples in demotable: ${tupleCount}`;
-    } else {
-        alert("Error in count demotable!");
-    }
-}
-
 
 
 
@@ -398,13 +388,12 @@ window.onload = function() {
     document.getElementById("addReporter").addEventListener("submit", addReporter, true);
     document.getElementById("updateIncident").addEventListener("submit", updateIncident, true);
     document.getElementById("addIncident").addEventListener("submit", addIncident,true);
-    document.getElementById("resetDemotable").addEventListener("click", resetDemotable, true);
-    document.getElementById("insertDemotable").addEventListener("submit", insertDemotable, true);
-    document.getElementById("updataNameDemotable").addEventListener("submit", updateNameDemotable, true);
-    document.getElementById("countDemotable").addEventListener("click", countDemotable, true);
     document.getElementById("deleteIncident").addEventListener("submit", deleteIncident, true);
     document.getElementById("getReporterDetailsForm").addEventListener("submit", getReporter, true);
-
+    document.getElementById("getIncidents").addEventListener("submit", getProfessionalIncidents, true);
+    document.getElementById("getEquipment").addEventListener("submit", getEquipment, true);
+    document.getElementById("delete_prof").addEventListener("submit", deleteProfessionalID, true);
+    document.getElementById("addProfessionalReporter").addEventListener("submit", addProfessionalReporter, true);
 
 };
 
