@@ -275,26 +275,31 @@ router.get("/civilian/incidents/:email", async (req, res) => {
 /* =========================================== */
 
 /**
- * Expected request:
+ * Expected request, this should be as a URI query:
  * {
  *     sort_by: "ascend" | "descend", OPTIONAL
  *     status: "Cancelled" | "Open" | "In progress", OPTIONAL
  *     display: string[] (could include "incidentID", "statusValue", "dateIncident", or "description") OPTIONAL
  * }
  *
- * Successful response: {
- *     incidents: array of objects that could look like (only the attributes from display
- *                in request are kept or all if display was not specified):
- *     {
- *         incidentID: number,
+ * Successful response:
+ *     incidents: array of string array that could look like (only the attributes from display
+ *                in request IN ORDER are kept or all if display was not specified):
+ *     [  [incidentID: number,
  *         statusValue: string,
  *         dateIncident: string (in the form YYYY-MM-DD),
- *         description: string
- *     }
- * }
+ *         description: string] ]
+ *
  */
 router.get("/municipal/incidents", async (req, res) => {
    // TODO
+    return appService.getIncidents(req.query)
+        .then((result) => {
+            return res.status(200).json(result);
+        })
+        .catch((err) => {
+            return res.status(400).send(err.message);
+        });
 });
 
 
