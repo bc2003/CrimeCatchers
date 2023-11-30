@@ -1,13 +1,13 @@
--- INSERT QUERY -> Insert a new tuple in InvolvedPerson, also triggers new tuple in Location (due to foreign key)
+-- INSERT QUERY -> Insert a new tuple in IncidentInfo, also triggers new tuple in IncidentStatus (due to foreign key)
 -- Query Implementation Reference: (file + directory + line)
-INSERT INTO InvolvedPerson (
-    name,
-    personID,
-    presentAtAddress
+INSERT INTO IncidentInfo (
+    incidentID,
+    dateIncident,
+    description
 ) VALUES (
-    :name,
-    :personID,
-    :presentAtAddress
+    :incidentID,
+    :dateIncident,
+    :description
 );
 
 -- DELETE QUERY -> Delete a tuple from IncidentStatus (triggers ON DELETE SET NULL for IncidentInfo)
@@ -35,7 +35,7 @@ SELECT II.incidentID, II.dateIncident
 FROM IncidentInfo II
 WHERE dateIncident > TO_DATE(:date, 'DD-MON-YYYY');
 
--- PROJECTION QUERY -> (action)
+-- PROJECTION QUERY -> allows user to choose just 3 columns to display
 -- Query Implementation Reference: (file + directory + line)
 SELECT :col1, :col2, :col3
 FROM :tableName;
