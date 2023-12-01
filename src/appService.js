@@ -131,6 +131,7 @@ async function getReporter(email) {
  * @param filterInfo.display - includes at least one of incidentID, statusValue, dateIncident, description
  */
 async function getIncidents(filterInfo) {
+    // TODO projection, AND/OR available to user
     const incidentInfoFields = ["description", "incidentID", "dateIncident"];
 
     let select = "SELECT";
@@ -155,35 +156,37 @@ async function getIncidents(filterInfo) {
 
     if (filterInfo.email) {
         where += " AND b.email = :email";
-        queryBindings += [filterInfo.email];
+        console.log(`adding email ${filterInfo.email}`);
+        queryBindings.push(filterInfo.email);
+
     }
 
     if (filterInfo.status) {
         where += " AND s.statusValue = :status";
-        queryBindings += [filterInfo.status];
+        queryBindings.push(filterInfo.status);
     }
 
     if (filterInfo.dateGreater) {
         where += " AND i.date > TO_DATE(:date1, 'yyyy-MM-dd')";
-        queryBindings += [filterInfo.dateGreater];
+        queryBindings.push(filterInfo.dateGreater);
     }
     if (filterInfo.dateLesser) {
         where += " AND i.date < TO_DATE(:date2, 'yyyy-MM-dd')";
-        queryBindings += [filterInfo.dateLesser];
+        queryBindings.push(filterInfo.dateLesser);
     }
 
     if (filterInfo.dateEqual) {
         where += " AND i.date = TO_DATE(:date3, 'yyyy-MM-dd')";
-        queryBindings += [filterInfo.dateEqual];
+        queryBindings.push(filterInfo.dateEqual);
     }
 
     if (filterInfo.sort_col) {
         orderBy += ` ORDER BY :sortCol`;
-        queryBindings += [filterInfo.sort_col];
+        queryBindings.push(filterInfo.sort_col);
 
         if (filterInfo.sort_by) {
             orderBy += " :sortBy";
-            queryBindings += [filterInfo.sort_by];
+            queryBindings.push(filterInfo.sort_by);
         }
     }
 
@@ -304,6 +307,8 @@ function createReporter(reporterInfo) {
 async function createIncident(incidentInfo) {
     // validate email and date in expected formats
 
+    // TODO incidentstatus fine but not incidentinfo
+
     // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
     // for the regex
     if (!incidentInfo.email.match(EMAIL_REGEX)) {
@@ -338,6 +343,8 @@ async function createIncident(incidentInfo) {
 }
 
 async function updateIncident(incidentInfo) {
+
+    // TODO oldInfo is undefined
     console.log(`got incidentinfo ${incidentInfo}`);
     return withOracleDB(async (connection) => {
         const oldInfo = await connection.execute(`SELECT r.email, i.description

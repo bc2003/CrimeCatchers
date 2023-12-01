@@ -101,15 +101,17 @@ async function addIncident(event) {
     });
 
     const responseStatus = await response.status;
-    const responseData = await response.json();
     const messageElement = document.getElementById('addIncidentResponse');
 
     if (responseStatus === 200) {
+        const responseData = await response.json();
         refreshIncidentTable(emailValue).finally(() => {
             messageElement.textContent = `Added incident successfully with ID ${responseData.incidentID}`;
         });
     } else {
-        messageElement.textContent = `There was an error`;
+        console.log("handling failure");
+        const errorText = await response.text();
+        messageElement.textContent = `There was an error - ${errorText}`;
     }
 }
 
@@ -290,6 +292,7 @@ async function addInvolvedWitness(event) {
 // Add or remove event listeners based on the desired functionalities.
 window.onload = function() {
     checkDbConnection();
+
     document.getElementById("showIncidents").addEventListener("submit", fetchIncidentData, true);
     document.getElementById("InvolvedPerson").addEventListener("submit", addInvolvedWitness, true);
     document.getElementById("addReporter").addEventListener("submit", addReporter, true);
@@ -297,5 +300,4 @@ window.onload = function() {
     document.getElementById("addIncident").addEventListener("submit", addIncident,true);
     document.getElementById("deleteIncident").addEventListener("submit", deleteIncident, true);
     document.getElementById("getReporterDetailsForm").addEventListener("submit", getReporter, true);
-
 };

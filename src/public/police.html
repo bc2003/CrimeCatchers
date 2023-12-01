@@ -5,10 +5,54 @@
 </head>
 <body>
 
-<h2>Show all Incidents</h2>
+<h1>Show all Incidents</h1>
 <form id="filterParams">
-    <b>TODO</b> <br/><br />
+    <fieldset>
+        <legend>Show the following:</legend>
+        <div>
+            <input type="checkbox" id="includeId" checked>
+            <label for="includeId">Incident ID</label>
+            <input type="checkbox" id="includeDescription" checked>
+            <label for="includeDescription">Description</label>
+            <input type="checkbox" id="includeDate" checked>
+            <label for="includeDate">Date Incident Occurred</label>
+            <input type="checkbox" id="includeStatus" checked>
+            <label for="includeStatus">Status</label><br />
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Filter by:</legend>
+        <div>
+            <button type="button" id="removeDateFilter">Reset Filter</button>
+            <br/>
+            <label for="beforeDate">All incidents before:</label>
+            <input type="date" id="beforeDate"> <br />
+            <label for="onDate">All incidents on the day of:</label>
+            <input type="date" id="onDate"> <br />
+            <label for="afterDate">All incidents after:</label>
+            <input type="date" id="afterDate">
+        </div>
+    </fieldset>
+    <fieldset>
+        <legend>Sort by:</legend>
+        <div>
+            <select name="category">
+                <option value="none" selected>Choose a column</option>
+                <option value="sortID">Incident ID</option>
+                <option value="sortDate">Date</option>
+                <option value="sortStatus">Status</option>
+            </select>
+            <br />
+            <input type="radio" name="sort" id="ascend">
+            <label for="ascend">Ascending</label>
+            <input type="radio" name="sort" id="descend">
+            <label for="descend">Descending</label>
+            <input type="radio" name="sort" id="noOrder" checked>
+            <label for="noOrder">None</label>
+        </div>
+    </fieldset>
 </form>
+<div id="filterParamsResult"></div>
 <table id="allIncidents">
     <thead>
     <tr>
@@ -21,21 +65,6 @@
     <tbody>
     </tbody>
 </table>
-
-<h2>Get the Incidencets</h2>
-
-<form id="getIncidents">
-    <label for="IncidentID">Input an Incident: </label><br>
-    <input type="IncidentID" id="IncidentID" name="IncidentID" required><br>
-
-    <label for="sort_by">sort_by</label><br>
-    <textarea id="sort_by" name="sort_by" required></textarea><br>
-
-    <label for="status">Status:</label><br>
-    <input type="text" id="status_add" name="status" value="created" readonly><br>
-
-    <button type="submit">Submit</button>
-</form>
 
 <table id="Displays">
     <thead>

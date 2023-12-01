@@ -6,9 +6,11 @@ const DEFAULT_PARAMS = {
  * Refresh the table
  * @param params as specified to the /municipal/incidents GET uri params
  *
+ * @param headers array that includes at least one of ["incidentID", "description", "dateIncident","statusValue"]
+ *
  * Attribution: see the starter code for CPSC 304 NodeJS
  */
-function refreshTable(params) {
+function refreshTable(params, headers) {
     const table = document.getElementById("allIncidents");
     const body = table.querySelector("tbody");
 
@@ -16,7 +18,13 @@ function refreshTable(params) {
         method: 'GET'
     }).then(async (response) => {
         const responseData = await response.json();
-        console.log(`result is ${JSON.stringify(responseData)}`);
+        const header = table.querySelector("thead");
+        header.deleteRow(0);
+        let row = header.insertRow(0);
+        for (let i = 0; i < headers.length; i++) {
+            let cell = row.insertCell(i);
+            cell.innerHTML = `<b>${headers[i]}</b>`;
+        }
 
         if (body) {
             body.innerHTML = '';
@@ -168,9 +176,46 @@ async function ViewOutStanding(event) {
         .catch(error => console.error('Error:', error));
 }
 
+async function onUpdateFilter(event) {
+    event.preventDefault();
+    let sending = {};
+
+    const filterParams = ["beforeDate", "onDate", "afterDate", "none", "sortID", "sortDate", "sortStatus",
+        "ascend", "descend", "noOrder"];
+    const columns = ["includeId", "includeDescription", "includeDate", "includeStatus"];
+
+    sending["display"] = [];
+    let columnNames = [];
+
+    if (document.getElementById(columns[0]).checked) {
+        sending["display"].push("incidentID");
+        columnNames.push("ID");
+    }
+    if (document.getElementById(columns[3]).checked) {
+        sending["display"].push("statusValue");
+        columnNames.push("Status");
+    }
+    if (document.getElementById(columns[2]).checked) {
+        sending["display"].push("dateIncident");
+        columnNames.push("Date");
+    }
+    if (document.getElementById(columns[1]).checked) {
+        sending["display"].push("description");
+        columnNames.push("Description");
+    }
+
+
+    refreshTable(sending, columnNames);
+}
+
+async function resetFilter(event) {
+    event.preventDefault();
+    document.getElementById("filterParamsResult").innerHTML = "reset filter";
+}
+
 
 window.onload = () => {
-    refreshTable(DEFAULT_PARAMS);
+    refreshTable(DEFAULT_PARAMS, ["ID", "Status", "Date", "Description"]);
     document.getElementById("getEquipment").addEventListener("submit", getEquipment, true);
     document.getElementById("delete_prof").addEventListener("submit", deleteProfessionalID, true);
     document.getElementById("addProfessionalReporter").addEventListener("submit", addProfessionalReporter, true);
@@ -178,5 +223,7 @@ window.onload = () => {
     document.getElementById("EquipmentWeights").addEventListener("click", ViewEquipmentWeights, true);
     document.getElementById("FireStations").addEventListener("click", ViewNeighbourPolice, true);
     document.getElementById("NoFireStations").addEventListener("click", ViewOutStanding, true);
-
+    const filterId = document.getElementById("filterParams");
+    filterId.addEventListener("change", onUpdateFilter, true);
+    document.getElementById("removeDateFilter").addEventListener("click", resetFilter, true);
 };
