@@ -48,6 +48,18 @@
             <label for="noOrder">None</label>
         </div>
     </fieldset>
+    <fieldset>
+        <legend>Search for:</legend>
+        <input type="radio" name="andOr" id="or">
+        <label for="or">OR</label>
+        <input type="radio" name="andOr" id="and" checked>
+        <label for="and">AND</label><br />
+        <label for="searchEmail">Reporter's email is</label>
+        <input type="text" id="searchEmail"> <br />
+        <label for="searchStatus">Status is</label>
+        <input type="text" id="searchStatus"> <br />
+
+    </fieldset>
 </form>
 <div id="filterParamsResult"></div>
 <table id="allIncidents">

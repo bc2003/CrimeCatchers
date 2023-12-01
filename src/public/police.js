@@ -17,6 +17,9 @@ function refreshTable(params, headers) {
     fetch("/municipal/incidents?" + new URLSearchParams(params), {
         method: 'GET'
     }).then(async (response) => {
+        if (!response.ok) {
+            throw new Error(await response.text());
+        }
         const responseData = await response.json();
         console.log(`result was ${JSON.stringify(responseData)}`);
         const header = table.querySelector("thead");
@@ -38,7 +41,11 @@ function refreshTable(params, headers) {
                 cell.textContent = field;
             })
         })
-    });
+    })
+        .catch((error) => {
+            const incidentHTML = document.getElementById("getIncidents");
+            incidentHTML.textContent = `Error loading the incidents: ${error}`;
+        });
 }
 
 async function getEquipment(event) {
@@ -225,6 +232,17 @@ function getAndSendTableUpdate() {
         } else {
             sending["sort_by"] = "desc";
         }
+    }
+
+    sending["or"] = document.getElementById("or").checked;
+
+    const searchEmail = document.getElementById("searchEmail").value;
+    if (searchEmail !== "") {
+        sending["email"] = searchEmail;
+    }
+    const searchStatus = document.getElementById("searchStatus").value;
+    if (searchStatus !== "") {
+        sending["status"] = searchStatus;
     }
 
 

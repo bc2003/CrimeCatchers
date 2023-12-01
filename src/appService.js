@@ -113,11 +113,17 @@ async function getReporter(email) {
  * @param filterInfo.dateEqual - of the form yyyy-MM-dd, only incidents w/ date equal
  * @param filterInfo.dateLesser - of the form yyyy-MM-dd, only incidents w/ date lesser
  * @param filterInfo.display - includes at least one of incidentID, statusValue, dateIncident, description
+ * @param filterInfo.or - true if we should use OR instead of AND
+ * @param filterInfo.incidentID - search for specific incident ID
+ * @param filterInfo.status - search for specific status
  */
 async function getIncidents(filterInfo) {
     // TODO AND/OR available to user
+    console.log(`filterInfo is ${JSON.stringify(filterInfo)}`);
     const incidentInfoFields = ["description", "incidentID", "dateIncident"];
     const incidentStatusFields = ["statusValue"];
+
+    const connector = filterInfo.or ? "OR" : "AND";
 
     let select = "SELECT";
     let from = " FROM IncidentInfo i, IncidentStatus s, ReportedBy b";
@@ -140,14 +146,14 @@ async function getIncidents(filterInfo) {
     }
 
     if (filterInfo.email) {
-        where += " AND b.email = :email";
+        where += ` AND b.email = :email`;
         console.log(`adding email ${filterInfo.email}`);
         queryBindings.push(filterInfo.email);
 
     }
 
     if (filterInfo.status) {
-        where += " AND s.statusValue = :status";
+        where += ` ${filterInfo.email ? connector : "AND"} s.statusValue = :status`;
         queryBindings.push(filterInfo.status);
     }
 
