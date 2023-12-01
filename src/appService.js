@@ -133,6 +133,7 @@ async function getReporter(email) {
 async function getIncidents(filterInfo) {
     // TODO projection, AND/OR available to user
     const incidentInfoFields = ["description", "incidentID", "dateIncident"];
+    const incidentStatusFields = ["statusValue"];
 
     let select = "SELECT";
     let from = " FROM IncidentInfo i, IncidentStatus s, ReportedBy b";
@@ -145,7 +146,7 @@ async function getIncidents(filterInfo) {
         displayArray.forEach((col) => {
             if (incidentInfoFields.includes(col)) {
                 select += ` i.${col},`;
-            } else {
+            } else if (incidentStatusFields.includes(col)) {
                 select += ` s.${col},`;
             }
         });
@@ -167,29 +168,33 @@ async function getIncidents(filterInfo) {
     }
 
     if (filterInfo.dateGreater) {
-        where += " AND i.date > TO_DATE(:date1, 'yyyy-MM-dd')";
+        where += " AND i.dateIncident > TO_DATE(:date1, 'yyyy-MM-dd')";
         queryBindings.push(filterInfo.dateGreater);
     }
     if (filterInfo.dateLesser) {
-        where += " AND i.date < TO_DATE(:date2, 'yyyy-MM-dd')";
+        where += " AND i.dateIncident < TO_DATE(:date2, 'yyyy-MM-dd')";
         queryBindings.push(filterInfo.dateLesser);
     }
 
     if (filterInfo.dateEqual) {
-        where += " AND i.date = TO_DATE(:date3, 'yyyy-MM-dd')";
+        where += " AND i.dateIncident = TO_DATE(:date3, 'yyyy-MM-dd')";
         queryBindings.push(filterInfo.dateEqual);
     }
 
     if (filterInfo.sort_col) {
-        orderBy += ` ORDER BY :sortCol`;
-        queryBindings.push(filterInfo.sort_col);
+        console.log(`sort_col is ${filterInfo.sort_col}`);
+        if (incidentInfoFields.includes(filterInfo.sort_col)) {
+            orderBy += ` ORDER BY i.${filterInfo.sort_col}`;
+        } else if (incidentStatusFields.includes(filterInfo.sort_col)) {
+            orderBy += ` ORDER BY s.${filterInfo.sort_col}`;
+        }
 
-        if (filterInfo.sort_by) {
-            orderBy += " :sortBy";
-            queryBindings.push(filterInfo.sort_by);
+        if (filterInfo.sort_by && filterInfo.sort_by === "asc") {
+            orderBy += " ASC";
+        } else if (filterInfo.sort_by && filterInfo.sort_by === "desc") {
+            orderBy += " DESC";
         }
     }
-
 
     const queryString = select + from + where + orderBy;
     console.log(`queryString was ${queryString}`);

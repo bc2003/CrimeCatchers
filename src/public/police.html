@@ -23,24 +23,21 @@
     <fieldset>
         <legend>Filter by:</legend>
         <div>
-            <button type="button" id="removeDateFilter">Reset Filter</button>
-            <br/>
-            <label for="beforeDate">All incidents before:</label>
-            <input type="date" id="beforeDate"> <br />
-            <label for="onDate">All incidents on the day of:</label>
-            <input type="date" id="onDate"> <br />
-            <label for="afterDate">All incidents after:</label>
-            <input type="date" id="afterDate">
+            <p>All incidents <select id="dateComparison">
+                <option value="filterLess">before</option>
+                <option value="filterEqual">on</option>
+                <option value="filterMore">after</option>
+            </select> <input type="date" id="filterDate"> <br /></p>
         </div>
     </fieldset>
     <fieldset>
         <legend>Sort by:</legend>
-        <div>
-            <select name="category">
-                <option value="none" selected>Choose a column</option>
-                <option value="sortID">Incident ID</option>
-                <option value="sortDate">Date</option>
-                <option value="sortStatus">Status</option>
+        <div id="sorting">
+            <select id="category">
+                <option value="none">Choose a column</option>
+                <option value="incidentID">Incident ID</option>
+                <option value="dateIncident">Date</option>
+                <option value="statusValue">Status</option>
             </select>
             <br />
             <input type="radio" name="sort" id="ascend">
@@ -60,19 +57,6 @@
         <th>Description</th>
         <th>Date</th>
         <th>Status</th>
-    </tr>
-    </thead>
-    <tbody>
-    </tbody>
-</table>
-
-<table id="Displays">
-    <thead>
-    <tr>
-        <th>incidentID</th>
-        <th>statusValue</th>
-        <th>dateIncident</th>
-        <th>description</th>
     </tr>
     </thead>
     <tbody>

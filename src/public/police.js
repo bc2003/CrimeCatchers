@@ -18,6 +18,7 @@ function refreshTable(params, headers) {
         method: 'GET'
     }).then(async (response) => {
         const responseData = await response.json();
+        console.log(`result was ${JSON.stringify(responseData)}`);
         const header = table.querySelector("thead");
         header.deleteRow(0);
         let row = header.insertRow(0);
@@ -176,8 +177,7 @@ async function ViewOutStanding(event) {
         .catch(error => console.error('Error:', error));
 }
 
-async function onUpdateFilter(event) {
-    event.preventDefault();
+function getAndSendTableUpdate() {
     let sending = {};
 
     const filterParams = ["beforeDate", "onDate", "afterDate", "none", "sortID", "sortDate", "sortStatus",
@@ -204,18 +204,42 @@ async function onUpdateFilter(event) {
         columnNames.push("Description");
     }
 
+    const date = document.getElementById("filterDate")
+    if (date && date.value !== "") {
+        const selection = document.getElementById("dateComparison");
+        if (selection.value === "filterLess") {
+            sending["dateLesser"] = date.value;
+        } else if (selection.value === "filterEqual") {
+            sending["dateEqual"] = date.value;
+        } else {
+            sending["dateGreater"] = date.value;
+        }
+    }
+
+    const sorting = document.getElementById("category");
+    const isNoOrderChecked = document.getElementById("noOrder").checked;
+    if (!isNoOrderChecked && sorting.value !== "none") {
+        sending["sort_col"] = sorting.value;
+        if (document.getElementById("ascend").checked) {
+            sending["sort_by"] = "asc";
+        } else {
+            sending["sort_by"] = "desc";
+        }
+    }
+
 
     refreshTable(sending, columnNames);
 }
 
-async function resetFilter(event) {
+async function onUpdateFilter(event) {
     event.preventDefault();
-    document.getElementById("filterParamsResult").innerHTML = "reset filter";
+    getAndSendTableUpdate();
 }
 
 
 window.onload = () => {
-    refreshTable(DEFAULT_PARAMS, ["ID", "Status", "Date", "Description"]);
+    // refreshTable(DEFAULT_PARAMS, ["ID", "Status", "Date", "Description"]);
+    getAndSendTableUpdate();
     document.getElementById("getEquipment").addEventListener("submit", getEquipment, true);
     document.getElementById("delete_prof").addEventListener("submit", deleteProfessionalID, true);
     document.getElementById("addProfessionalReporter").addEventListener("submit", addProfessionalReporter, true);
@@ -225,5 +249,4 @@ window.onload = () => {
     document.getElementById("NoFireStations").addEventListener("click", ViewOutStanding, true);
     const filterId = document.getElementById("filterParams");
     filterId.addEventListener("change", onUpdateFilter, true);
-    document.getElementById("removeDateFilter").addEventListener("click", resetFilter, true);
 };
