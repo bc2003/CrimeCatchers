@@ -99,7 +99,7 @@ router.get('/count-demotable', async (req, res) => {
  * }
  */
 router.post("/civilian/incident", async (req, res) => {
-    console.log(`Processing POST /civilian/incident with json ${req.body}`);
+    console.log(`Processing POST /civilian/incident with json ${JSON.stringify(req.body)}`);
     if (!req.body.email || !req.body.description || !req.body.date || !req.body.involved) {
         return res.status(400).send("Missing parameters");
     }
@@ -294,8 +294,6 @@ router.get("/civilian/incidents/:email", async (req, res) => {
  *
  */
 router.get("/municipal/incidents", async (req, res) => {
-   // TODO
-    console.log(`query was ${JSON.stringify(req.query)}`);
     return appService.getIncidents(req.query)
         .then((result) => {
             return res.status(200).json(result);
@@ -370,10 +368,56 @@ router.get('/municipal/equipment', async (req, res) => {
     const { incidentID, sort_by, display } = req.query;
     try {
         const equipmentDetails = await appService.getEquipmentDetails(incidentID, sort_by, display ? display.split(',') : []);
-        res.json(equipmentDetails);
+        res.status(200).json(equipmentDetails);
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving equipment details', error: error.message });
+        res.status(200).json({ message: 'Error retrieving equipment details', error: error.message });
     }
 });
+
+router.get('/municipal/neighbourhood/incidents', async (req, res) => {
+   return appService.getIncidentAggregation()
+       .then((result) => {
+           return res.status(200).json(result);
+       })
+       .catch((err) => {
+           console.log(err.message);
+           return res.status(400).send(err.message);
+       });
+});
+
+router.get("/municipal/neighbourhood/weight", async (req, res) => {
+    return appService.getWeightAggregation()
+        .then((result) => {
+            return res.status(200).json(result);
+        })
+        .catch((err) => {
+            console.log(err.message);
+            return res.status(400).send(err.message);
+        });
+})
+
+router.get("/municipal/neighbourhood/police", async (req, res) => {
+    return appService.getPoliceCalculation()
+        .then((result) => {
+            return res.status(200).json(result);
+        })
+        .catch((err) => {
+            console.log(err.message);
+            return res.status(400).send(err.message);
+        });
+});
+
+router.get("/municipal/neighbourhood/outstanding", async (req, res) => {
+    return appService.getOutstandingCalculation()
+        .then((result) => {
+            console.log(JSON.stringify(result));
+            return res.status(200).json(result);
+        })
+        .catch((err) => {
+            console.log(err.message);
+            return res.status(400).send(err.message);
+        });
+});
+
 
 module.exports = router;

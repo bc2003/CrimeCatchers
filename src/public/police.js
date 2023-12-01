@@ -126,7 +126,7 @@ async function ViewNeighbourHood(event) {
     fetch('/municipal/neighbourhood/incidents')
         .then(response => response.json())
         .then(data => {
-            const resultsContainer = document.getElementById('results');
+            const resultsContainer = document.getElementById('neighbourhoodResults');
             resultsContainer.innerHTML = '';
             data.forEach(item => {
                 resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
@@ -140,10 +140,10 @@ async function ViewEquipmentWeights(event) {
     fetch('/municipal/neighbourhood/weight')
         .then(response => response.json())
         .then(data => {
-            const resultsContainer = document.getElementById('results');
+            const resultsContainer = document.getElementById('weightResults');
             resultsContainer.innerHTML = '';
             data.forEach(item => {
-                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+                resultsContainer.innerHTML += `<p>Department ID ${item[0]} has weight ${item[1]}</p>`;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -154,10 +154,10 @@ async function ViewNeighbourPolice(event) {
     fetch('/municipal/neighbourhood/police')
         .then(response => response.json())
         .then(data => {
-            const resultsContainer = document.getElementById('results');
+            const resultsContainer = document.getElementById('fireStationResults');
             resultsContainer.innerHTML = '';
             data.forEach(item => {
-                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+                resultsContainer.innerHTML += `<p>${item[0]}</p>`;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -168,10 +168,10 @@ async function ViewOutStanding(event) {
     fetch('/municipal/neighbourhood/outstanding')
         .then(response => response.json())
         .then(data => {
-            const resultsContainer = document.getElementById('results');
+            const resultsContainer = document.getElementById('incidentsNoDepartmentResults');
             resultsContainer.innerHTML = '';
             data.forEach(item => {
-                resultsContainer.innerHTML += `<p>${item[0]}: ${item[1]}</p>`;
+                resultsContainer.innerHTML += `<p>${item[0]}</p>`;
             });
         })
         .catch(error => console.error('Error:', error));
@@ -236,14 +236,19 @@ async function onUpdateFilter(event) {
     getAndSendTableUpdate();
 }
 
+function getAllTablesFromDB() {
+    const all_tables = document.getElementById("all_tables");
+}
+
 
 window.onload = () => {
     // refreshTable(DEFAULT_PARAMS, ["ID", "Status", "Date", "Description"]);
     getAndSendTableUpdate();
+    getAllTablesFromDB();
     document.getElementById("getEquipment").addEventListener("submit", getEquipment, true);
     document.getElementById("delete_prof").addEventListener("submit", deleteProfessionalID, true);
     document.getElementById("addProfessionalReporter").addEventListener("submit", addProfessionalReporter, true);
-    document.getElementById("NeightbourHoodReports").addEventListener("click", ViewNeighbourHood, true);
+    document.getElementById("NeighbourHoodReports").addEventListener("click", ViewNeighbourHood, true);
     document.getElementById("EquipmentWeights").addEventListener("click", ViewEquipmentWeights, true);
     document.getElementById("FireStations").addEventListener("click", ViewNeighbourPolice, true);
     document.getElementById("NoFireStations").addEventListener("click", ViewOutStanding, true);

@@ -65,7 +65,7 @@
 
 <div id="getIncidents"></div>
 
-<h2>Get the equipments</h2>
+<h2>Get the Equipment Associated with an Incident</h2>
 
 <form id="getEquipment">
     <label for="IncidentID">Input an Incident: </label><br>
@@ -116,32 +116,36 @@
 
 <div id="addProfessionalReporter"></div>
 
+<div id="all_tables">
+
+</div>
 
 
-<h1>NeighourHood Incidents</h1>
-<form id="NeightbourHoodReports">
+
+<h1>Neighbourhood Incidents</h1>
+<form id="NeighbourHoodReports">
     <button id="loadNeightbourhood">Load Neighbourhood Incidents</button>
-    <div id="results"></div>
+    <div id="neighbourhoodResults"></div>
 </form>
 
 
 <h1>Equipments and Weights</h1>
 <form id="EquipmentWeights">
-    <button id="loadEquipmentWeight">Load Neighbourhood Incidents</button>
-    <div id="results"></div>
+    <button id="loadEquipmentWeight">Calculate the total weight of equipment for each department</button>
+    <div id="weightResults"></div>
 </form>
 
 
 <h1>Police Stations and Fire Stations</h1>
 <form id="FireStations">
-    <button id="loadFireStations">Load Neighbourhoods with More Police Stations</button>
-    <div id="results"></div>
+    <button id="loadFireStations">Load Neighbourhoods with More Police Stations than Fire Stations</button>
+    <div id="fireStationResults"></div>
 </form>
 
 <h1>Outstanding Cases</h1>
 <form id="NoFireStations">
-    <button id="loadNoFireStations">Load Neighbourhoods with incident but no fire responder</button>
-    <div id="results"></div>
+    <button id="loadNoFireStations">Load Neighbourhoods with incidents but no departments</button>
+    <div id="incidentsNoDepartmentResults"></div>
 </form>
 
 <script src="./police.js"></script>

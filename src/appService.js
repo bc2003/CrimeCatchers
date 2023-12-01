@@ -79,22 +79,6 @@ async function initiateDemotable() {
     });
 }
 
-// Define the incident data according to your ER diagram and functionality requirements
-const incidentData = {
-    Email: 'user@example.com',
-    Description: 'Description of the incident',
-    Date: new Date().toISOString(),
-    Status: 'created',
-    Involved: [
-      {
-        name: 'John Doe',
-        specialAttributes: { /* special attributes as per your ER diagram */ }
-      },
-      // ... other involved persons
-    ]
-  };
-
-
 /**
  * Get information about a reporter.
  * @param {String} email email of the reporter to look up
@@ -131,7 +115,7 @@ async function getReporter(email) {
  * @param filterInfo.display - includes at least one of incidentID, statusValue, dateIncident, description
  */
 async function getIncidents(filterInfo) {
-    // TODO projection, AND/OR available to user
+    // TODO AND/OR available to user
     const incidentInfoFields = ["description", "incidentID", "dateIncident"];
     const incidentStatusFields = ["statusValue"];
 
@@ -182,7 +166,6 @@ async function getIncidents(filterInfo) {
     }
 
     if (filterInfo.sort_col) {
-        console.log(`sort_col is ${filterInfo.sort_col}`);
         if (incidentInfoFields.includes(filterInfo.sort_col)) {
             orderBy += ` ORDER BY i.${filterInfo.sort_col}`;
         } else if (incidentStatusFields.includes(filterInfo.sort_col)) {
@@ -337,9 +320,10 @@ async function createIncident(incidentInfo) {
         }
 
         // Note: these are protected from injection when using bound variables
+        console.log(`generatedIncidentID: ${generatedIncidentID}`);
         await connection.execute(`INSERT INTO IncidentStatus VALUES (:incident_description, :incident_status)`, [incidentInfo.description, incidentInfo.status], { autoCommit: true });
-        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE('${dateIncident}', '${dateFormat}'), '${incidentInfo.description}')`; // TODO bindings
-        await connection.execute(queryInfo, [], { autoCommit: true });
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE(:dateIncident, '${dateFormat}'), :description)`; // TODO bindings
+        await connection.execute(queryInfo, [`${dateIncident}`, `${incidentInfo.description}`], { autoCommit: true });
         await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`, [], { autoCommit: true });
         return {
             incidentID: generatedIncidentID
@@ -513,6 +497,69 @@ async function recreateAllTables() {
     });
 }
 
+async function getIncidentAggregation() {
+    const query = `SELECT L.neighbourhood, COUNT(*) AS TotalIncidents
+                          FROM OccurredAt OA, Location L
+                          WHERE OA.address = L.address
+                          GROUP BY L.neighbourhood`
+    return withOracleDB(async (connection) => {
+        return connection.execute(query, [], {autoCommit: true})
+            .then((result) => {
+                return result.rows;
+            })
+    })
+}
+
+async function getWeightAggregation() {
+    const query = `SELECT item.belongsToBranchID, SUM(info.weight) AS EquipmentWeight
+                            FROM EquipmentInfo info, EquipmentItem item
+                            WHERE info.type = item.type
+                            GROUP BY item.belongsToBranchID
+                            HAVING COUNT(*) > 1`
+    return withOracleDB(async (connection) => {
+        return connection.execute(query, [], {autoCommit: true})
+            .then((result) => {
+                return result.rows;
+            })
+    })
+}
+
+async function getPoliceCalculation() {
+    const query = `SELECT L1.neighbourhood
+                            FROM Department D1, Location L1
+                            WHERE D1.locatedAtAddress = L1.address and D1.specialty = 'police'
+                            GROUP BY L1.neighbourhood
+                            HAVING COUNT(*) > (
+                                SELECT COUNT(*)
+                                FROM Department D2, Location L2
+                                WHERE D2.locatedAtAddress = L2.address and D2.specialty = 'fire' and L1.neighbourhood = L2.neighbourhood
+                            )`
+    return withOracleDB(async (connection) => {
+        return connection.execute(query, [], {autoCommit: true})
+            .then((result) => {
+                return result.rows;
+            })
+    });
+}
+
+async function getOutstandingCalculation() {
+    const query = `SELECT L.neighbourhood
+                            FROM OccurredAt OA, Location L
+                            WHERE OA.address = L.address
+                            GROUP BY L.neighbourhood
+                            MINUS
+                            SELECT L.neighbourhood
+                            FROM Department D, Location L
+                            WHERE D.locatedAtAddress = L.address
+                            GROUP BY L.neighbourhood`
+    return withOracleDB(async (connection) => {
+        return connection.execute(query, [], {autoCommit: true})
+            .then((result) => {
+                return result.rows;
+            })
+    });
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
@@ -526,5 +573,9 @@ module.exports = {
     getReporter,
     updateIncident,
     addInvolvedPerson,
-    getIncidents
+    getIncidents,
+    getIncidentAggregation,
+    getWeightAggregation,
+    getPoliceCalculation,
+    getOutstandingCalculation,
 };
