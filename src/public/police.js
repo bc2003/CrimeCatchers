@@ -46,6 +46,7 @@ function refreshTable(params, headers) {
             const incidentHTML = document.getElementById("getIncidents");
             incidentHTML.textContent = `Error loading the incidents: ${error}`;
         });
+
 }
 
 async function getEquipment(event) {
@@ -70,6 +71,8 @@ async function getEquipment(event) {
     } else {
         messageElement.textContent = `There was an error`;
     }
+    getAllTablesFromDB();
+
 }
 
 async function deleteProfessionalID(event) {
@@ -94,6 +97,8 @@ async function deleteProfessionalID(event) {
     } else {
         messageElement.textContent = `There was an error`;
     }
+    getAllTablesFromDB();
+
 }
 
 async function addProfessionalReporter(event) {
@@ -125,6 +130,8 @@ async function addProfessionalReporter(event) {
     } else {
         messageElement.textContent = `There was an error`;
     }
+    getAllTablesFromDB();
+
 }
 
 
@@ -247,11 +254,15 @@ function getAndSendTableUpdate() {
 
 
     refreshTable(sending, columnNames);
+    getAllTablesFromDB();
+
 }
 
 async function onUpdateFilter(event) {
     event.preventDefault();
     getAndSendTableUpdate();
+    getAllTablesFromDB();
+
 }
 
 function getAllTablesFromDB() {
