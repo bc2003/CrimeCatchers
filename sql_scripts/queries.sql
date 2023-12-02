@@ -1,12 +1,8 @@
 -- INSERT QUERY -> Insert a new tuple in IncidentInfo, also triggers new tuple in IncidentStatus (due to foreign key)
 -- Query Implementation Reference: appService.js in createIncident(), starting at line XXX
-INSERT INTO IncidentInfo (
-    incidentID,
-    dateIncident,
-    description
-) VALUES (
+INSERT INTO IncidentInfo VALUES (
     :incidentID,
-    :dateIncident,
+    TO_DATE(:dateIncident, 'yyyy-MM-dd'),
     :description
 );
 
@@ -22,19 +18,11 @@ SET dateIncident = TO_DATE(:ndate, 'yyyy-MM-dd'),
     description = :newDescription
 WHERE incidentID = :incidentID;
 
--- SELECTION QUERY -> Select incidents whether they occur before, on, or after the user-inputted date
+-- SELECTION QUERY -> Select incidents based on who the user inputted as the email
 -- Query Implementation Reference: appService.js in getIncidents(), starting at line
-SELECT II.incidentID, II.dateIncident
-FROM IncidentInfo II
-WHERE dateIncident < TO_DATE(:date, 'DD-MON-YYYY');
-
-SELECT II.incidentID, II.dateIncident
-FROM IncidentInfo II
-WHERE dateIncident = TO_DATE(:date, 'DD-MON-YYYY');
-
-SELECT II.incidentID, II.dateIncident
-FROM IncidentInfo II
-WHERE dateIncident > TO_DATE(:date, 'DD-MON-YYYY');
+SELECT i.incidentID, i.description, i.dateIncident, s.statusValue
+FROM IncidentInfo i, IncidentStatus s, ReportedBy b
+WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email
 
 -- PROJECTION QUERY -> allows user to choose a few columns to display
 -- Query Implementation Reference: appService.js in getIncidents(), starting at line

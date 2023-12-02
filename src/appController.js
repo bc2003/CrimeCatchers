@@ -254,9 +254,7 @@ router.put("/civilian/involvedperson", async (req, res) => {
 });
 
 router.get("/civilian/incidents/:email", async (req, res) => {
-    return appService.getIncidents({
-        email: req.params.email
-    })
+    return appService.getIncidentsWithEmail(req.params.email)
        .then((result) => {
            console.log("returning success");
            return res.status(200).json(result);

@@ -89,6 +89,19 @@ async function getReporter(email) {
     });
 }
 
+async function getIncidentsWithEmail(email) {
+    const query = `SELECT i.incidentID, i.description, i.dateIncident, s.statusValue
+                          FROM IncidentInfo i, IncidentStatus s, ReportedBy b
+                          WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email`;
+
+    return withOracleDB((connection) => {
+       return connection.execute(query, [email], {autoCommit: true})
+           .then((result) => {
+               return result.rows;
+           });
+    });
+}
+
 /**
  * Get incidents, filtering by the filter info.
  * @param filterInfo - filter all incidents by keys in here (all optional)
@@ -177,7 +190,7 @@ async function getIncidents(filterInfo) {
     console.log(`queryString was ${queryString}`);
     console.log(`queryBindings was ${JSON.stringify(queryBindings)}`);
     return withOracleDB((connection) => {
-        return connection.execute(queryString, queryBindings, {autoCommit: true, maxRows: 50})
+        return connection.execute(queryString, queryBindings, {autoCommit: true})
             .then((result) => {
                 return result.rows;
             });
@@ -287,10 +300,6 @@ function createReporter(reporterInfo) {
  * @throws {Error} if updating the database fails
  */
 async function createIncident(incidentInfo) {
-    // validate email and date in expected formats
-
-    // TODO incidentstatus fine but not incidentinfo
-
     // https://stackoverflow.com/questions/46155/how-can-i-validate-an-email-address-in-javascript
     // for the regex
     if (!incidentInfo.email.match(EMAIL_REGEX)) {
@@ -316,8 +325,8 @@ async function createIncident(incidentInfo) {
         // Note: these are protected from injection when using bound variables
         console.log(`generatedIncidentID: ${generatedIncidentID}`);
         await connection.execute(`INSERT INTO IncidentStatus VALUES (:incident_description, :incident_status)`, [incidentInfo.description, incidentInfo.status], { autoCommit: true });
-        let queryInfo = `INSERT INTO IncidentInfo VALUES (${generatedIncidentID}, TO_DATE(:dateIncident, '${dateFormat}'), :description)`; // TODO bindings
-        await connection.execute(queryInfo, [`${dateIncident}`, `${incidentInfo.description}`], { autoCommit: true });
+        let queryInfo = `INSERT INTO IncidentInfo VALUES (:incidentID, TO_DATE(:dateIncident, 'yyyy-MM-dd'), :description)`;
+        await connection.execute(queryInfo, [generatedIncidentID, `${dateIncident}`, `${incidentInfo.description}`], { autoCommit: true });
         await connection.execute(`INSERT INTO ReportedBy VALUES (${generatedIncidentID}, '${incidentInfo.email}', TO_DATE('${dateIncident}', '${dateFormat}'))`, [], { autoCommit: true });
         return {
             incidentID: generatedIncidentID
@@ -326,9 +335,6 @@ async function createIncident(incidentInfo) {
 }
 
 async function updateIncident(incidentInfo) {
-
-    // TODO oldInfo is undefined
-    console.log(`got incidentinfo ${incidentInfo}`);
     return withOracleDB(async (connection) => {
         const oldInfo = await connection.execute(`SELECT r.email, i.description
                                                          FROM Reporter r, ReportedBy rb, IncidentInfo i
@@ -338,18 +344,20 @@ async function updateIncident(incidentInfo) {
                 return result.rows[0];
             });
 
+        if (oldInfo === undefined) {
+            throw new Error("Old incident info doesn't exist, does this Incident exist?");
+        }
+
         console.log(`oldInfo is ${JSON.stringify(oldInfo)}`);
 
-
-        await connection.execute(`DELETE FROM IncidentStatus I
-                                  WHERE I.description = :description`,
-            [oldInfo["DESCRIPTION"]], {autoCommit: true});
-
-        console.log("got description");
 
         await connection.execute(`INSERT INTO IncidentStatus
                                   VALUES (:newDescription, :newStatus)`,
             [incidentInfo.newDescription, incidentInfo.status], {autoCommit: true});
+
+
+        console.log("got description");
+
 
         console.log("inserted new incidentstatus");
 
@@ -358,7 +366,11 @@ async function updateIncident(incidentInfo) {
                                        description = :newDescription
                                    WHERE incidentID = :incidentID`,
             [incidentInfo.date, incidentInfo.newDescription, incidentInfo.incidentID], {autoCommit: true})
-            .then(() => {
+            .then(async () => {
+                await connection.execute(`DELETE FROM IncidentStatus I
+                                  WHERE I.description = :description`,
+                    [oldInfo["DESCRIPTION"]], {autoCommit: true});
+
                 return {
                     email: oldInfo['EMAIL']
                 }
@@ -572,6 +584,22 @@ async function getAllTablesAndColumns() {
     })
 }
 
+async function deleteIncident(incidentID) {
+    return withOracleDB((connection) => {
+        return connection.execute(`SELECT s.description
+                                    FROM IncidentStatus s, IncidentInfo i
+                                    WHERE i.description = s.description AND i.incidentID = :incidentID`,
+            [incidentID.incidentID])
+            .then(async (result) => {
+                console.log(`selected ${JSON.stringify(result)}`)
+                console.log(result.rows[0][0]);
+                return connection.execute(`DELETE FROM IncidentStatus I
+                                           WHERE I.description = :description`,
+                    [result.rows[0][0]], {autoCommit: true});
+            })
+    })
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
@@ -590,5 +618,6 @@ module.exports = {
     getPoliceCalculation,
     getOutstandingCalculation,
     getAllTablesAndColumns,
-
+    deleteIncident,
+    getIncidentsWithEmail
 };
