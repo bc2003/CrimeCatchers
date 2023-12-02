@@ -56,7 +56,7 @@ CREATE TABLE IncidentInfo(
     dateIncident DATE,
     description VARCHAR(200),
     FOREIGN KEY (description) REFERENCES IncidentStatus(description)
-   	 ON DELETE SET NULL
+   	 ON DELETE CASCADE
     );
 
 CREATE TABLE Location(
@@ -223,29 +223,29 @@ VALUES ('human trafficking', 'in-progress');
 
 -- IncidentInfo Table
 INSERT INTO IncidentInfo(incidentID, dateIncident, description)
-VALUES (1, TO_DATE('20-OCT-2023', 'DD-MON-YYYY'), 'stabbing');
+VALUES (incidentID.nextval, TO_DATE('20-OCT-2023', 'DD-MON-YYYY'), 'stabbing');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (2, TO_DATE('17-NOV-2011', 'DD-MON-YYYY'), 'arson');
+VALUES (incidentID.nextval, TO_DATE('17-NOV-2011', 'DD-MON-YYYY'), 'arson');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (3, TO_DATE('29-FEB-2020', 'DD-MON-YYYY'), 'shooting');
+VALUES (incidentID.nextval, TO_DATE('29-FEB-2020', 'DD-MON-YYYY'), 'shooting');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (4, TO_DATE('09-MAY-2017', 'DD-MON-YYYY'), 'bomb threat');
+VALUES (incidentID.nextval, TO_DATE('09-MAY-2017', 'DD-MON-YYYY'), 'bomb threat');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (5, TO_DATE('05-JAN-2010', 'DD-MON-YYYY'), 'vehicle theft');
+VALUES (incidentID.nextval, TO_DATE('05-JAN-2010', 'DD-MON-YYYY'), 'vehicle theft');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (6, TO_DATE('16-NOV-2010', 'DD-MON-YYYY'), 'burglary');
+VALUES (incidentID.nextval, TO_DATE('16-NOV-2010', 'DD-MON-YYYY'), 'burglary');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (7, TO_DATE('08-JUN-2023', 'DD-MON-YYYY'), 'murder');
+VALUES (incidentID.nextval, TO_DATE('08-JUN-2023', 'DD-MON-YYYY'), 'murder');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (8, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'possession of illegal substances');
+VALUES (incidentID.nextval, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'possession of illegal substances');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (9, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'jaywalking');
+VALUES (incidentID.nextval, TO_DATE('20-APR-2008', 'DD-MON-YYYY'), 'jaywalking');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (10, TO_DATE('06-JUL-2020', 'DD-MON-YYYY'), 'assault');
+VALUES (incidentID.nextval, TO_DATE('06-JUL-2020', 'DD-MON-YYYY'), 'assault');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (11, TO_DATE('06-JUL-2021', 'DD-MON-YYYY'), 'DUI');
+VALUES (incidentID.nextval, TO_DATE('06-JUL-2021', 'DD-MON-YYYY'), 'DUI');
 INSERT INTO IncidentInfo(incidentID, dateIncident, description) 
-VALUES (12, TO_DATE('24-MAY-2023', 'DD-MON-YYYY'), 'human trafficking');
+VALUES (incidentID.nextval, TO_DATE('24-MAY-2023', 'DD-MON-YYYY'), 'human trafficking');
 
 -- Location Table
 INSERT INTO Location(address, neighbourhood)

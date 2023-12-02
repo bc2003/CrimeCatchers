@@ -137,16 +137,17 @@ async function updateIncident(event) {
     });
 
     const responseStatus = await response.status;
-    const responseData = await response.json();
-    console.log(`got response data ${JSON.stringify(responseData)}`);
     const messageElement = document.getElementById('updateIncidentResponse');
 
     if (responseStatus === 200) {
-        refreshIncidentTable(responseData.email).finally(() => {
+        const responseData = await response.json();
+
+        refreshIncidentTable(document.getElementById("civilianEmail").value).finally(() => {
             messageElement.textContent = `Updated incident successfully`;
         });
     } else {
-        messageElement.textContent = `There was an error`;
+        const errorMsg = await response.text();
+        messageElement.textContent = `There was an error - ${errorMsg}`;
     }
 }
 
@@ -182,7 +183,6 @@ async function addReporter(event) {
 
 async function deleteIncident(event) {
     event.preventDefault();
-    console.log("THIS GETS PRINTED")
     const deleteID = document.getElementById("delete_ID").value;
     const response = await fetch('/civilian/incident', {
         method: 'DELETE',
@@ -190,7 +190,7 @@ async function deleteIncident(event) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            deleteID: deleteID,
+            incidentID: deleteID,
         })
     });
 
@@ -198,10 +198,14 @@ async function deleteIncident(event) {
     const messageElement = document.getElementById('deleted_Incident');
 
     if (responseStatus === 200) {
-        messageElement.textContent = `The incident was deleted`;
+        refreshIncidentTable(document.getElementById("civilianEmail").value).finally(() => {
+            messageElement.textContent = `Deleted incident successfully`;
+        });
     } else {
-        messageElement.textContent = `There was an error`;
+        const errorMsg = await response.text();
+        messageElement.textContent = `There was an error - ${errorMsg}`;
     }
+
 }
 
 
