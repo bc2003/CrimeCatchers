@@ -19,7 +19,7 @@ SET dateIncident = TO_DATE(:ndate, 'yyyy-MM-dd'),
 WHERE incidentID = :incidentID;
 
 -- SELECTION QUERY -> Select incidents based on who the user inputted as the email
--- Query Implementation Reference: appService.js in getIncidents(), starting at line 93
+-- Query Implementation Reference: appService.js in getIncidentsWithEmail(), starting at line 93
 SELECT i.incidentID, i.description, i.dateIncident, s.statusValue
 FROM IncidentInfo i, IncidentStatus s, ReportedBy b
 WHERE i.description = s.description AND b.incidentID = i.incidentID AND b.email = :email
