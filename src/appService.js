@@ -4,6 +4,12 @@ const loadEnvFile = require('./utils/envUtil');
 const envVariables = loadEnvFile('./.env');
 const fs = require("fs");
 
+const tables = ["IncidentStatus", "IncidentInfo", "Location", "OccurredAt", "Department",
+    "Responder", "AssignedTo", "InvolvedPerson", "Involves", "Suspect", "Victim",
+    "Bystander", "Reporter", "ReportedBy", "EquipmentInfo", "EquipmentItem",
+    "VehicleSpecs", "VehicleInfo"].reverse(); // reverse to delete dependencies first
+
+
 // load queries here from sql_scripts/queries.sql (TODO)
 
 // Database configuration setup. Ensure your .env file has the required database credentials.
@@ -59,25 +65,6 @@ async function fetchDemotableFromDb() {
     });
 }
 
-async function initiateDemotable() {
-    return await withOracleDB(async (connection) => {
-        try {
-            await connection.execute(`DROP TABLE DEMOTABLE`);
-        } catch(err) {
-            console.log('Table might not exist, proceeding to create...');
-        }
-
-        const result = await connection.execute(`
-            CREATE TABLE DEMOTABLE (
-                id NUMBER PRIMARY KEY,
-                name VARCHAR2(20)
-            )
-        `);
-        return true;
-    }).catch(() => {
-        return false;
-    });
-}
 
 /**
  * Get information about a reporter.
@@ -118,12 +105,12 @@ async function getReporter(email) {
  * @param filterInfo.status - search for specific status
  */
 async function getIncidents(filterInfo) {
-    // TODO AND/OR available to user
     console.log(`filterInfo is ${JSON.stringify(filterInfo)}`);
     const incidentInfoFields = ["description", "incidentID", "dateIncident"];
     const incidentStatusFields = ["statusValue"];
 
-    const connector = filterInfo.or ? "OR" : "AND";
+    const connector = (filterInfo.or && filterInfo.or === "true") ? "OR" : "AND";
+    console.log(`connector is ${connector}`);
 
     let select = "SELECT";
     let from = " FROM IncidentInfo i, IncidentStatus s, ReportedBy b";
@@ -145,15 +132,16 @@ async function getIncidents(filterInfo) {
         select += " i.incidentID, i.description, i.dateIncident, s.statusValue"
     }
 
-    if (filterInfo.email) {
+    if (filterInfo.email && filterInfo.status) {
+        where += ` AND (b.email = :email ${connector} s.statusValue = :status)`;
+        queryBindings.push(filterInfo.email);
+        queryBindings.push(filterInfo.status);
+    } else if (filterInfo.email) {
         where += ` AND b.email = :email`;
-        console.log(`adding email ${filterInfo.email}`);
         queryBindings.push(filterInfo.email);
 
-    }
-
-    if (filterInfo.status) {
-        where += ` ${filterInfo.email ? connector : "AND"} s.statusValue = :status`;
+    } else if (filterInfo.status) {
+        where += ` AND s.statusValue = :status`;
         queryBindings.push(filterInfo.status);
     }
 
@@ -189,7 +177,7 @@ async function getIncidents(filterInfo) {
     console.log(`queryString was ${queryString}`);
     console.log(`queryBindings was ${JSON.stringify(queryBindings)}`);
     return withOracleDB((connection) => {
-        return connection.execute(queryString, queryBindings, {autoCommit: true})
+        return connection.execute(queryString, queryBindings, {autoCommit: true, maxRows: 50})
             .then((result) => {
                 return result.rows;
             });
@@ -353,9 +341,8 @@ async function updateIncident(incidentInfo) {
         console.log(`oldInfo is ${JSON.stringify(oldInfo)}`);
 
 
-        await connection.execute(`DELETE
-                                  FROM IncidentStatus
-                                  WHERE description = :oldDescription`,
+        await connection.execute(`DELETE FROM IncidentStatus I
+                                  WHERE I.description = :description`,
             [oldInfo["DESCRIPTION"]], {autoCommit: true});
 
         console.log("got description");
@@ -463,10 +450,6 @@ async function addInvolvedPerson(involvedInfo) {
  */
 async function recreateAllTables() {
     return withOracleDB(async (connection) => {
-        const tables = ["IncidentStatus", "IncidentInfo", "Location", "OccurredAt", "Department",
-            "Responder", "AssignedTo", "InvolvedPerson", "Involves", "Suspect", "Victim",
-            "Bystander", "Reporter", "ReportedBy", "EquipmentInfo", "EquipmentItem",
-            "VehicleSpecs", "VehicleInfo"].reverse(); // reverse to delete dependencies first
 
         const sequences = ["incidentID", "branchID", "professionalID", "personID", "equipmentID"];
 
@@ -566,11 +549,33 @@ async function getOutstandingCalculation() {
     });
 }
 
+async function getAllTablesAndColumns() {
+    let returnResult = [];
+    return withOracleDB(async (connection) => {
+        return connection.execute(`SELECT table_name FROM user_tables`)
+            .then((result) => {
+                result.rows.forEach(async (elt) => {
+                    console.log(`elt was ${elt}`);
+                    // this should be safe as all elts are from the DB
+                    await connection.execute(`SELECT * FROM ${elt}`, [], {outFormat: oracledb.OUT_FORMAT_OBJECT})
+                        .then((res) => {
+                            let tableObj = {
+                                name: elt[0],
+                                rows: res.rows
+                            }
+                            returnResult.push(tableObj);
+                            console.log(`we got ${res.rows}`);
+                        });
+                });
+                return returnResult;
+            })
+    })
+}
+
 module.exports = {
     testOracleConnection,
     fetchDemotableFromDb,
-    initiateDemotable, 
-    insertDemotable, 
+    insertDemotable,
     updateNameDemotable, 
     countDemotable,
     createIncident,
@@ -584,4 +589,6 @@ module.exports = {
     getWeightAggregation,
     getPoliceCalculation,
     getOutstandingCalculation,
+    getAllTablesAndColumns,
+
 };

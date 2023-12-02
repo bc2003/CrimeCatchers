@@ -18,7 +18,8 @@ WHERE I.description = :description;
 -- UPDATE QUERY -> Update an Incident (IncidentInfo relation) with a new date
 -- Query Implementation Reference: appService.js in updateIncident(), starting at line
 UPDATE IncidentInfo
-SET dateIncident = :date
+SET dateIncident = TO_DATE(:ndate, 'yyyy-MM-dd'),
+    description = :newDescription
 WHERE incidentID = :incidentID;
 
 -- SELECTION QUERY -> Select incidents whether they occur before, on, or after the user-inputted date

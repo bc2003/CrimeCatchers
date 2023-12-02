@@ -410,14 +410,25 @@ router.get("/municipal/neighbourhood/police", async (req, res) => {
 router.get("/municipal/neighbourhood/outstanding", async (req, res) => {
     return appService.getOutstandingCalculation()
         .then((result) => {
-            console.log(JSON.stringify(result));
             return res.status(200).json(result);
         })
         .catch((err) => {
-            console.log(err.message);
             return res.status(400).send(err.message);
         });
 });
+
+router.get("/municipal/tables", async (req, res) => {
+    return appService.getAllTablesAndColumns()
+        .then((result) => {
+            return res.status(200).json(result);
+        })
+        .catch((err) => {
+            return res.status(400).send(err.message);
+        })
+});
+
+
+
 
 
 module.exports = router;

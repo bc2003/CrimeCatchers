@@ -242,7 +242,7 @@ function getAndSendTableUpdate() {
     }
     const searchStatus = document.getElementById("searchStatus").value;
     if (searchStatus !== "") {
-        sending["status"] = searchStatus;
+        sending["stazus"] = searchStatus;
     }
 
 
@@ -255,7 +255,45 @@ async function onUpdateFilter(event) {
 }
 
 function getAllTablesFromDB() {
-    const all_tables = document.getElementById("all_tables");
+    const allTables = document.getElementById("fillInTables");
+
+    return fetch("/municipal/tables")
+        .then(async (response) => {
+            let json = await response.json();
+            json.forEach((table) => {
+                console.log(`table is ${JSON.stringify(table)}`);
+                const h2 = document.createElement("h2");
+                h2.textContent = table["name"];
+                allTables.appendChild(h2);
+                const tbl = document.createElement("table");
+                allTables.appendChild(tbl);
+                const thead = document.createElement("thead");
+                tbl.appendChild(thead);
+                const tr = document.createElement("tr");
+                thead.appendChild(tr);
+                // const headerTitles = header.createElement("tr");
+                for (const result of Object.keys(table["rows"][0])) {
+                    const td = document.createElement("td");
+                    const b = document.createElement("b");
+                    b.textContent = result;
+                    td.appendChild(b);
+                    tr.appendChild(td);
+                }
+                const tbody = document.createElement("tbody");
+                tbl.appendChild(tbody);
+                const rows = table["rows"];
+                for (let i = 0; i < rows.length; i++) {
+                    const values = Object.values(rows[i]);
+                    const newTr = document.createElement("tr");
+                    for (const value of values) {
+                        const newTd = document.createElement("td");
+                        newTd.textContent = value;
+                        newTr.append(newTd);
+                    }
+                    tbody.appendChild(newTr);
+                }
+            });
+        });
 }
 
 
